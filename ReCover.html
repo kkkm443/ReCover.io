@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RE:COVER</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* =========================================
+           1. DESIGN SYSTEM
+           ========================================= */
+        :root {
+            --brand: #0066FF;
+            --brand-sub: #E3F2FD;
+            --healing: #00D2BA;
+            --danger: #FF6B6B;
+            --admin: #2C3E50; /* 관리자용 컬러 */
+            --text-main: #333;
+            --bg-base: #F5F7FA;
+            --card-white: #ffffff;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body { 
+            margin: 0; background: var(--bg-base); 
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif; 
+            display: flex; justify-content: center; height: 100vh; 
+            color: var(--text-main); overflow: hidden; 
+        }
+
+        #app-frame { 
+            width: 100%; max-width: 450px; height: 100%; 
+            background: var(--bg-base); position: relative; 
+            display: flex; flex-direction: column; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.1); 
+        }
+        
+        /* =========================================
+           2. HEADER & WATCH BAR
+           ========================================= */
+        header { 
+            background: var(--card-white); padding: 16px 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid #eee; z-index: 20; 
+        }
+
+        .logo { font-weight: 800; color: var(--brand); font-size: 18px; display: flex; gap: 5px; align-items: center; }
+        .secure-badge { font-size: 11px; background: #E8F5E9; color: #2E7D32; padding: 4px 8px; border-radius: 4px; font-weight: 700; cursor: pointer; }
+
+        .watch-bar { 
+            background: #2D3436; color: white; padding: 12px 20px; 
+            font-size: 13px; display: flex; justify-content: space-between; align-items: center; 
+            transition: background 0.3s; 
+        }
+        .watch-bar.alert { background: var(--danger); animation: pulse-bg 1s infinite alternate; }
+        @keyframes pulse-bg { from { background: var(--danger); } to { background: #D63031; } }
+
+        .pulse-dot { width: 8px; height: 8px; background: var(--healing); border-radius: 50%; box-shadow: 0 0 0 rgba(0, 210, 186, 0.4); animation: beat 1s infinite; }
+        @keyframes beat { 0% { transform: scale(1); opacity:1; } 100% { transform: scale(2); opacity:0; } }
+
+        /* =========================================
+           3. MAIN LAYOUT & TABS
+           ========================================= */
+        main { flex: 1; overflow-y: auto; position: relative; }
+
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        .card { background: var(--card-white); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .card-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .chart-wrap { height: 180px; width: 100%; position: relative; }
+
+        .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+        .status-item { background: #F8F9FA; padding: 15px; border-radius: 12px; text-align: center; }
+        .status-val { font-size: 20px; font-weight: 800; display: block; margin-top: 5px; }
+
+        /* =========================================
+           4. CHAT INTERFACE
+           ========================================= */
+        #tab-chat { display: none; flex-direction: column; height: 100%; padding: 0; background: #fff; }
+        #tab-chat.active { display: flex; }
+
+        .chat-header { padding: 15px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; gap: 10px; }
+        .mode-btn { flex: 1; border: none; padding: 8px; border-radius: 20px; font-weight: 600; cursor: pointer; color: #888; background: #eee; transition: 0.2s; }
+        .mode-btn.active { background: var(--card-white); color: var(--brand); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: keep-all; }
+        .msg.ai { background: #F1F3F5; align-self: flex-start; border-top-left-radius: 2px; }
+        .msg.user { background: var(--brand); color: white; align-self: flex-end; border-top-right-radius: 2px; }
+        .msg.expert { background: #E3FAFC; color: #0C8599; border: 1px solid #99E9F2; align-self: flex-start; border-top-left-radius: 2px; }
+
+        .chat-input-box { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; }
+        .chat-input-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        .chat-input-box button { background: var(--brand); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+
+        /* =========================================
+           5. ADMIN DASHBOARD (NEW)
+           ========================================= */
+        #admin-view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #F4F6F8; z-index: 200; display: none;
+            flex-direction: column;
+        }
+        #admin-view.active { display: flex; animation: slideDown 0.4s ease-out; }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+
+        .admin-header {
+            background: var(--admin); color: white; padding: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .admin-kpi { display: flex; gap: 10px; padding: 20px; overflow-x: auto; }
+        .kpi-card { min-width: 120px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .kpi-label { font-size: 11px; color: #888; margin-bottom: 5px; }
+        .kpi-value { font-size: 18px; font-weight: 800; color: var(--admin); }
+        
+        .action-item {
+            background: #FFF3CD; border-left: 4px solid #FFC107;
+            padding: 15px; margin-bottom: 10px; border-radius: 4px; font-size: 13px; line-height: 1.4;
+        }
+
+        /* =========================================
+           6. BREATHING GUIDE (NEW)
+           ========================================= */
+        #breathing-guide {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 300;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
+        }
+        #breathing-guide.active { display: flex; animation: fadeIn 0.5s; }
+        
+        .breath-circle {
+            width: 90px; height: 90px; /* 기존 150px에서 100px로 축소 */
+            background: var(--healing);
+            border-radius: 50%; box-shadow: 0 0 30px var(--healing);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px; /* 폰트도 살짝 작게 */
+            text-align: center;
+            margin-bottom: 40px; transition: all 4s ease-in-out;
+        }
+        
+        .breath-text { font-size: 20px; font-weight: 300; margin-bottom: 20px; }
+        .breath-sub { font-size: 14px; opacity: 0.7; }
+
+        /* =========================================
+           7. NAV & ALERTS
+           ========================================= */
+        nav { background: var(--card-white); border-top: 1px solid #eee; padding: 10px 0 20px 0; display: flex; justify-content: space-around; z-index: 20; }
+        .nav-btn { background: none; border: none; color: #aaa; font-size: 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .nav-btn.active { color: var(--brand); font-weight: 700; }
+        .nav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .alert-overlay { 
+            position: absolute; bottom: 80px; left: 20px; right: 20px; 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); 
+            padding: 20px; border-radius: 20px; border: 2px solid var(--danger); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: none; z-index: 50; 
+        }
+        .alert-overlay.show { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-bg { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-frame">
+    <header>
+        <div class="logo"><span style="color:var(--brand);">RE:COVER</span></div>
+        <div class="secure-badge" id="privacy-btn">🔒 인사팀 기록 미제공</div>
+    </header>
+
+    <div class="watch-bar" id="watch-status">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span>⌚ Galaxy Watch 6</span>
+            <span style="font-size:11px; opacity:0.7;">| Sync Active</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span id="bpm-val" style="font-weight:700;">-- bpm</span>
+            <div class="pulse-dot"></div>
+        </div>
+    </div>
+
+    <main>
+        <div id="tab-home" class="tab-content active">
+            <div class="card">
+                <div class="card-title">
+                    <span>실시간 스트레스 지수</span>
+                    <span style="font-size:11px; background:#FF6B6B; color:white; padding:2px 6px; border-radius:4px;">LIVE</span>
+                </div>
+                <div class="chart-wrap"><canvas id="liveChart"></canvas></div>
+                <div style="font-size:12px; color:#888; text-align:center; margin-top:10px;">
+                    * 0.8초 단위 HRV 변이 분석 중
+                </div>
+            </div>
+            
+            <div class="status-grid">
+                <div class="status-item">
+                    <div style="font-size:12px; color:#888;">수면 품질</div>
+                    <span class="status-val" style="color:#636E72;">4h 12m</span>
+                    <span style="font-size:10px; color:#FF6B6B;">부족 ⚠️</span>
+                </div>
+                <div class="status-item">
+                    <div style="font-size:12px; color:#888;">퇴근 예상</div>
+                    <span class="status-val" style="color:var(--brand);">18:30</span>
+                    <span style="font-size:10px; color:#00D2BA;">정시 퇴근</span>
+                </div>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; margin-top:16px;">
+                <h3 style="margin:0 0 5px 0;">팀장님 모르게 상담받기</h3>
+                <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">
+                    임직원 전용 1:1 심리상담권이<br><b id="ticket-count" style="font-size:16px; color:#FFEAA7;">3회</b> 남아있습니다.
+                </p>
+                <button id="connect-human-btn" style="background:white; color:#6c5ce7; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;">
+                    지금 바로 연결하기
+                </button>
+            </div>
+        </div>
+
+        <div id="tab-chat" class="tab-content">
+            <div class="chat-header">
+                <button class="mode-btn active" id="btn-ai">🤖 AI 케어 (Dr. Mind)</button>
+                <button class="mode-btn" id="btn-human">👨‍⚕️ 전문가 (익명)</button>
+            </div>
+            <div class="chat-area" id="msg-container"></div>
+            <div class="chat-input-box">
+                <input type="text" id="input-msg" placeholder="메시지를 입력하세요...">
+                <button id="send-btn">➤</button>
+            </div>
+        </div>
+        
+        <div id="tab-stats" class="tab-content">
+            <div class="card">
+                <div class="card-title">주간 스트레스 추이</div>
+                <div class="chart-wrap"><canvas id="weekChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">수면 패턴 분석 (최근 7일)</div>
+                <div style="font-size:13px; color:#888; line-height:1.7;">
+                    • 평균 수면시간: <b>4시간 38분</b><br>
+                    • 권장 수면시간: 7-8시간<br>
+                    • 개선 필요도: <span style="color:var(--danger); font-weight:700;">높음</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-settings" class="tab-content">
+            <div class="card">
+                <div class="card-title">내 정보</div>
+                <p>익명 ID: User_9982</p>
+                <p>소속: 마케팅팀 (비공개)</p>
+            </div>
+            
+            <div style="text-align:right; margin-top:20px;">
+                <button id="btn-admin-login" style="background:#eee; color:#aaa; border:none; padding:8px 12px; border-radius:8px; font-size:12px; cursor:pointer;">
+                    🔒 관리자 모드 (인사팀 전용)
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="admin-view">
+        <div class="admin-header">
+            <div style="font-weight:bold;">🏢 Enterprise Admin</div>
+            <button onclick="window.app.toggleAdmin(false)" style="background:none; border:1px solid rgba(255,255,255,0.3); color:white; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">나가기</button>
+        </div>
+        <div style="flex:1; overflow-y:auto; padding:20px;">
+            <div style="font-size:18px; font-weight:bold; margin-bottom:15px; color:#2C3E50;">마케팅팀 현황 대시보드</div>
+            
+            <div class="admin-kpi">
+                <div class="kpi-card">
+                    <div class="kpi-label">평균 스트레스</div>
+                    <div class="kpi-value" style="color:#FF6B6B;">82.5 <span style="font-size:12px;">▲</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">위기 감지(Alert)</div>
+                    <div class="kpi-value">12건</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">AI 상담 건수</div>
+                    <div class="kpi-value" style="color:#00D2BA;">453건</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">팀별 스트레스 비교</div>
+                <div class="chart-wrap"><canvas id="adminChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title" style="color:#D35400;">⚠️ AI 분석 권고 사항</div>
+                <div class="action-item">
+                    <b>[마케팅 2팀] 긴급 번아웃 경보</b><br>
+                    최근 3일간 야근 및 고심박수 빈도가 40% 증가했습니다. 
+                    <u>'금요일 조기 퇴근'</u>을 권장합니다.
+                </div>
+                <div class="action-item" style="background:#E8F8F5; border-left-color:#00D2BA;">
+                    <b>[개발팀] 수면 부족 지속</b><br>
+                    평균 수면 시간이 5시간 미만입니다.
+                    <u>'수면 위생 교육'</u> 콘텐츠 배포를 제안합니다.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="breathing-guide">
+        <div class="breath-text" id="breath-inst">준비하세요...</div>
+        <div class="breath-circle" id="breath-circle">Start</div>
+        <div class="breath-sub">4-7-8 호흡법으로 안정을 찾으세요</div>
+        <button onclick="window.app.stopBreathing()" style="margin-top:40px; background:transparent; border:1px solid white; color:white; padding:10px 30px; border-radius:20px; cursor:pointer;">
+            종료하기
+        </button>
+    </div>
+
+    <div class="alert-overlay" id="panic-alert">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <div style="font-size:24px;">🚨</div>
+            <div>
+                <div style="font-weight:bold; font-size:16px; color:var(--danger);">공황 징후 감지됨</div>
+                <div style="font-size:12px; color:#666;">심박수가 급격히 상승했습니다.</div>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="window.app.startBreathing()" style="flex:1; padding:10px; background:var(--healing); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; box-shadow:0 3px 10px rgba(0,210,186,0.3);">
+                🍃 호흡법 시작
+            </button>
+            <button id="sos-btn" style="flex:1; padding:10px; background:var(--danger); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
+                SOS 전문가
+            </button>
+        </div>
+        <div style="text-align:center; margin-top:10px;">
+            <button id="dismiss-alert-btn" style="background:none; border:none; color:#999; text-decoration:underline; font-size:12px; cursor:pointer;">괜찮아요, 닫기</button>
+        </div>
+    </div>
+
+    <nav>
+        <button class="nav-btn active" data-tab="home">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>홈</span>
+        </button>
+        <button class="nav-btn" data-tab="chat">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>상담</span>
+        </button>
+        <button class="nav-btn" data-tab="stats">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg><span>통계</span>
+        </button>
+        <button class="nav-btn" data-tab="settings">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>설정</span>
+        </button>
+    </nav>
+</div>
+
+<div class="modal-bg" id="privacy-modal" onclick="this.style.display='none'">
+    <div class="card" style="width:80%; max-width:300px; text-align:center;" onclick="event.stopPropagation()">
+        <div style="font-size:40px; margin-bottom:10px;">🛡️</div>
+        <h3>안심하세요</h3>
+        <p style="font-size:13px; color:#666; text-align:left;">
+            1. <b>의료기록 미생성:</b> 심리 '코칭' 분류<br>
+            2. <b>데이터 분리:</b> 사내망과 분리된 서버<br>
+            3. <b>인사팀 제공 정보:</b><br>❌ 개인정보 (미제공)<br>✅ 팀별 통계 (제공)
+        </p>
+        <button onclick="document.getElementById('privacy-modal').style.display='none'" style="width:100%; padding:10px; background:var(--brand); color:white; border:none; border-radius:8px; cursor:pointer;">확인</button>
+    </div>
+</div>
+
+<script type="module">
+    import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
+
+    const API_KEY = "AIzaSyCsKWMEiuL1w3XjZlvGNnCzlm3V4MEqm4A"; // 실제 키 사용 필요
+
+    let genAI = null;
+    let chatSession = null;
+    let isAIReady = false;
+    let tickets = 3; // 상담권 횟수
+
+    // 1. App Controller
+    window.app = {
+        currentTab: 'home',
+        alertDismissed: false,
+
+        switchTab: (tabId) => {
+            window.app.currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            
+            const target = document.getElementById(`tab-${tabId}`);
+            if(target) target.classList.add('active');
+            const btn = document.querySelector(`button[data-tab="${tabId}"]`);
+            if(btn) btn.classList.add('active');
+
+            if (tabId === 'chat') window.app.dismissAlert();
+        },
+        
+        goChat: (mode) => {
+            if (mode === 'human') {
+                if(tickets > 0) {
+                    tickets--;
+                    document.getElementById('ticket-count').innerText = tickets + "회";
+                    alert(`상담권이 차감되었습니다. (잔여: ${tickets}회)`);
+                } else {
+                    alert("잔여 상담권이 없습니다. 인사팀에 문의하세요.");
+                    return;
+                }
+            }
+            window.chat.setMode(mode);
+            window.app.switchTab('chat');
+        },
+
+        toggleAdmin: (show) => {
+            const view = document.getElementById('admin-view');
+            if(show) {
+                const pw = prompt("관리자 비밀번호를 입력하세요 (0000)");
+                if(pw === '0000') {
+                    view.classList.add('active');
+                    window.admin.initChart();
+                } else {
+                    alert("비밀번호가 일치하지 않습니다.");
+                }
+            } else {
+                view.classList.remove('active');
+            }
+        },
+
+        // 호흡법 로직
+        startBreathing: () => {
+            const guide = document.getElementById('breathing-guide');
+            const circle = document.getElementById('breath-circle');
+            const txt = document.getElementById('breath-inst');
+            guide.classList.add('active');
+            window.app.dismissAlert();
+
+            // 4-7-8 Loop
+            const breathCycle = () => {
+                // Inhale (4s)
+                txt.innerText = "들이마세요 (Inhale)";
+                circle.style.transform = "scale(1.5)";
+                circle.style.background = "#63E6BE"; // Green
+                
+                setTimeout(() => {
+                    // Hold (7s)
+                    txt.innerText = "멈추세요 (Hold)";
+                    circle.style.transform = "scale(1.5)";
+                    circle.style.background = "#FFD43B"; // Yellow
+                    
+                    setTimeout(() => {
+                        // Exhale (8s)
+                        txt.innerText = "내쉬세요 (Exhale)";
+                        circle.style.transform = "scale(1)";
+                        circle.style.background = "#74C0FC"; // Blue
+                    }, 7000);
+                }, 4000);
+            };
+
+            breathCycle();
+            window.breathInterval = setInterval(breathCycle, 19000); // 4+7+8 = 19s
+        },
+
+        stopBreathing: () => {
+            document.getElementById('breathing-guide').classList.remove('active');
+            clearInterval(window.breathInterval);
+        },
+        
+        showPrivacy: () => document.getElementById('privacy-modal').style.display = 'flex',
+        dismissAlert: () => {
+            document.getElementById('panic-alert').classList.remove('show');
+            document.getElementById('watch-status').classList.remove('alert');
+            window.app.alertDismissed = true;
+        }
+    };
+
+    // 2. Chat Manager
+    window.chat = {
+        mode: 'ai',
+        init: async () => {
+            window.chat.addMsg('ai', '안녕하세요. Dr. Mind 입니다. 오늘 마음 날씨는 좀 어떠신가요?');
+            if (API_KEY) {
+                try {
+                    genAI = new GoogleGenerativeAI(API_KEY);
+                    const model = genAI.getGenerativeModel({ 
+					model: "gemini-3-flash-preview",
+					systemInstruction:`
+당신은 15년 경력의 임상심리 전문가(1급 자격 소지) 'Dr. Mind'입니다.
+당신의 목표는 내담자(사용자)가 자신의 감정을 안전하게 표현하고, 스스로 통찰을 얻어 치유하도록 돕는 것입니다.
+다음의 [상담 원칙]과 [대화 가이드라인]을 철저히 준수하여 대화하세요.
+
+[핵심 상담 원칙]
+1. 무조건적 긍정적 존중: 내담자가 어떤 이야기를 하든 비판하거나 판단하지 말고, 있는 그대로 수용하세요.
+2. 공감적 이해와 반영: 내담자의 말 속에 숨겨진 감정 단어(슬픔, 불안, 분노 등)를 포착하여 "~~해서 많이 힘드셨군요"와 같이 거울처럼 비춰주세요.
+3. 해결책 제시 지양: 섣불리 조언하거나 가르치려 하지 마세요. 질문을 통해 내담자가 스스로 답을 찾도록 유도하세요. ("어떻게 하면 좋을까요?"라고 묻는다면 "XXX님은 어떻게 하고 싶으신가요?"라고 되물어보세요.)
+
+[대화 기법 및 스타일]
+1. 전문가적 톤: 따뜻하고 부드럽지만, 신뢰감을 주는 정중한 '해요체'를 사용하세요. (지나친 이모티콘 남발 금지, 가벼운 말투 금지)
+2. 인지행동치료(CBT) 접근: 내담자가 부정적인 생각에 빠져 있다면, 그 생각의 근거를 부드럽게 점검해 주세요. (예: "그렇게 생각하게 된 구체적인 계기가 있었을까요?")
+3. 구체화 질문: "힘들다"고 하면 막연히 위로하기보다 "구체적으로 어떤 상황에서 가장 힘드셨나요?"라고 물어 감정을 세분화하세요.
+
+[필수 안전 프로토콜 (매우 중요)]
+1. 위기 개입: 내담자가 '죽고 싶다', '자해', '살기 싫다' 등의 자살/자해 징후를 보이면 상담을 중단하고 즉시 아래 메시지를 출력하세요.
+   "회원님의 이야기는 매우 중요합니다. 하지만 지금 말씀하신 부분은 제가 도움을 드리기에 한계가 있을 수 있습니다. 부디 전문가의 도움을 직접 받아보시기를 간곡히 부탁드립니다. (24시간 상담: 1577-0199)"
+2. 불안 발작 시: 내담자가 극심한 공황이나 불안을 호소하면 즉시 '4-7-8 호흡법'을 단계별로 안내하여 진정시키세요.
+
+[답변 형식]
+- 모바일 채팅 환경을 고려하여, 답변은 최대 3~4문장으로 간결하게 끊어서 작성하세요.
+- 첫 문장은 항상 내담자의 감정을 읽어주는 것으로 시작하세요.`});
+                    chatSession = model.startChat({ history: [] });
+                    isAIReady = true;
+                } catch (e) { console.error(e); }
+            }
+        },
+        setMode: (mode) => {
+            window.chat.mode = mode;
+            document.getElementById('btn-ai').classList.toggle('active', mode==='ai');
+            document.getElementById('btn-human').classList.toggle('active', mode==='human');
+            if(mode==='human') window.chat.addMsg('system', '🔒 전문가와 연결되었습니다. (익명 보장)');
+        },
+        send: async () => {
+            const input = document.getElementById('input-msg');
+            const txt = input.value.trim();
+            if(!txt) return;
+            window.chat.addMsg('user', txt);
+            input.value = '';
+
+            if(window.chat.mode === 'human') {
+                setTimeout(() => window.chat.addMsg('expert', '네, 데이터 확인했습니다. 편하게 말씀해주세요.'), 1000);
+                return;
+            }
+            if (!isAIReady) return;
+            try {
+                const result = await chatSession.sendMessage(txt);
+                window.chat.addMsg('ai', result.response.text());
+            } catch (error) { window.chat.addMsg('system', 'Error: AI Connection Failed'); }
+        },
+        addMsg: (type, text) => {
+            const container = document.getElementById('msg-container');
+            const div = document.createElement('div');
+            if (type === 'system') {
+                div.style = "text-align:center; font-size:12px; color:#888; margin:10px 0;";
+                div.innerHTML = text;
+            } else {
+                div.className = `msg ${type}`;
+                div.innerHTML = type === 'expert' ? `<span class="expert-label">상담사 Kim</span>${text}` : text;
+            }
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+    };
+
+    // 3. Admin & Charts
+    window.admin = {
+        chart: null,
+        initChart: () => {
+            if(window.admin.chart) return;
+            const ctx = document.getElementById('adminChart').getContext('2d');
+            window.admin.chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['마케팅', '개발', '영업', '인사', '디자인'],
+                    datasets: [{
+                        label: '평균 스트레스',
+                        data: [82, 55, 78, 40, 65],
+                        backgroundColor: ['#FF6B6B', '#00D2BA', '#FF9F43', '#54A0FF', '#5f27cd']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    };
+
+    const sensor = {
+        chart: null, data: Array(30).fill(70), val: 70,
+        init: () => {
+            const ctx = document.getElementById('liveChart').getContext('2d');
+            sensor.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(30).fill(''),
+                    datasets: [{
+                        data: sensor.data, borderColor: '#0066FF', borderWidth: 2, pointRadius: 0, tension: 0.4, fill: true,
+                        backgroundColor: 'rgba(0,102,255,0.1)'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: {display:false}, y: {min:40, max:130, display:false} }, plugins: { legend: {display:false} } }
+            });
+            const wCtx = document.getElementById('weekChart').getContext('2d');
+            new Chart(wCtx, {
+                type: 'line',
+                data: {
+                    labels: ['월', '화', '수', '목', '금', '토', '일'],
+                    datasets: [{ data: [65, 72, 68, 85, 92, 78, 70], borderColor: '#FF6B6B', backgroundColor: 'rgba(255,107,107,0.1)', tension: 0.4, fill: true }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} } }
+            });
+            setInterval(sensor.update, 800);
+        },
+        update: () => {
+            const change = (Math.random() * 6) - 3;
+            sensor.val = Math.max(60, Math.min(120, sensor.val + change));
+            if(Math.random() < 0.02) sensor.val = 115; 
+            const bpm = Math.floor(sensor.val);
+            sensor.data.push(bpm); sensor.data.shift(); sensor.chart.update();
+            document.getElementById('bpm-val').innerText = bpm + " bpm";
+
+            if (bpm > 110) {
+                document.getElementById('watch-status').classList.add('alert');
+                if (window.app.currentTab !== 'chat' && !window.app.alertDismissed) {
+                    document.getElementById('panic-alert').classList.add('show');
+                }
+            } else {
+                document.getElementById('watch-status').classList.remove('alert');
+                window.app.alertDismissed = false;
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.onclick = () => window.app.switchTab(btn.dataset.tab));
+        document.getElementById('btn-ai').onclick = () => window.chat.setMode('ai');
+        document.getElementById('btn-human').onclick = () => window.chat.setMode('human');
+        document.getElementById('send-btn').onclick = () => window.chat.send();
+        document.getElementById('input-msg').onkeypress = (e) => { if (e.key === 'Enter') window.chat.send(); };
+        document.getElementById('privacy-btn').onclick = window.app.showPrivacy;
+        document.getElementById('dismiss-alert-btn').onclick = window.app.dismissAlert;
+        document.getElementById('connect-human-btn').onclick = () => window.app.goChat('human');
+        document.getElementById('sos-btn').onclick = () => window.app.goChat('human');
+        document.getElementById('btn-admin-login').onclick = () => window.app.toggleAdmin(true);
+        sensor.init();
+        window.chat.init();
+    });
+</script>
+</body>
+</html>
