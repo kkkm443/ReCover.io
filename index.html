@@ -168,6 +168,7 @@
             border-radius: 16px; 
             padding: 20px; 
             margin-bottom: 16px; 
+			margin-top: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
         }
 
@@ -249,9 +250,7 @@
             font-weight: 800;
             font-size: 15px;
             
-            /* [수정] 위쪽 여백 추가 (간격 벌리기) */
             margin-top: 16px; 
-            
             margin-bottom: 16px;
             cursor: pointer;
             display: flex;
@@ -344,23 +343,21 @@
         #tab-chat { display: none; flex-direction: column; height: 100%; padding: 0; background: #fff; position: relative; }
         #tab-chat.active { display: flex; }
 
-        /* [수정] 상단 바 정렬 완벽 수정 */
         .chat-top-bar { 
-            position: relative;       /* ◀ 중요: 자식 요소(배지)의 기준점이 됩니다 */
+            position: relative;       
             height: 60px;
             padding: 0 20px;
             background: #fff; 
             border-bottom: 1px solid #eee; 
             display: flex; 
-            justify-content: space-between; /* 양쪽 버튼을 끝으로 밀어줌 */
+            justify-content: space-between; 
             align-items: center; 
         }
 
-        /* [수정] 중앙 배지: 절대 위치로 정중앙 고정 */
         .chat-secure-label { 
-            position: absolute;       /* ◀ 중요: 흐름에서 벗어나 독자적으로 위치 잡기 */
-            left: 50%;                /* 부모의 50% 지점으로 이동 */
-            transform: translateX(-50%); /* 내 크기의 절반만큼 다시 왼쪽으로 이동 -> 완벽한 중앙 */
+            position: absolute;       
+            left: 50%;                
+            transform: translateX(-50%); 
             
             display: flex; 
             align-items: center; 
@@ -373,27 +370,25 @@
             padding: 0 14px; 
             border-radius: 20px;
             font-size: 12px;
-            white-space: nowrap;      /* 줄바꿈 방지 */
+            white-space: nowrap;      
         }
 
-        /* [수정] 좌우 버튼 공통 스타일 (햄버거, 다시선택) */
         .chat-top-bar button {
-            display: flex;            /* 버튼 내부도 flex로 정렬 */
+            display: flex;            
             align-items: center; 
             justify-content: center;
-            height: 40px;             /* 터치 영역 확보 */
+            height: 40px;             
             background: none;
             border: none;
             cursor: pointer;
         }
 
-        /* [수정] 우측 '다시 선택' 버튼 전용 스타일 */
         .chat-reset-btn {
-            border: 1px solid #eee !important; /* !important로 덮어쓰기 */
+            border: 1px solid #eee !important; 
             background: white !important;
             border-radius: 20px;
             padding: 0 12px;
-            height: 32px !important;  /* 배지와 높이 맞춤 */
+            height: 32px !important;  
             font-size: 11px;
             color: #666;
             gap: 4px;
@@ -434,7 +429,7 @@
         .time-btn.selected { background: var(--brand); color: white; border-color: var(--brand); }
         .book-action-btn { background: #333; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; }
 
-        /* [관리자 화면: 애니메이션 수정됨 - 움직임 없이 투명도만 변화 (Fade In)] */
+        /* [관리자 화면 애니메이션] */
         #admin-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #F4F6F8; z-index: 200; display: none; flex-direction: column; }
         #admin-view.active { display: flex; animation: adminFade 0.3s ease-out; }
         
@@ -452,7 +447,6 @@
         #breathing-guide.active { display: flex; animation: fadeIn 0.5s; }
         .breath-circle { width: 90px; height: 90px; background: var(--healing); border-radius: 50%; box-shadow: 0 0 30px var(--healing); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; margin-bottom: 40px; transition: all 4s ease-in-out; }
         
-        /* [수정] 호흡 가이드 글자 겹침 방지 여백 추가 */
         .breath-text {font-size: 24px; font-weight: bold; margin-bottom: 40px; transition: opacity 0.3s;}
 		
         #emergency-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; background: #fff; padding: 25px; border-radius: 20px; border: 3px solid var(--danger); text-align: center; box-shadow: 0 10px 50px rgba(255, 107, 107, 0.4); z-index: 400; display: none; }
@@ -470,20 +464,19 @@
         
         .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
 
-        /* [새로 추가됨] 안심 안내 팝업 전용 스타일 */
         .new-privacy-card {
             background: white;
             width: 85%;
             max-width: 320px;
             padding: 40px 25px;
-            border-radius: 30px; /* 둥글게 */
+            border-radius: 30px; 
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             position: relative;
         }
 
         .p-title {
-            color: var(--brand); /* 파란색 */
+            color: var(--brand); 
             font-size: 22px;
             font-weight: 800;
             margin-bottom: 10px;
@@ -516,8 +509,8 @@
         .p-icon {
             min-width: 24px;
             height: 24px;
-            background: #E3F2FD; /* 연한 파랑 배경 */
-            color: var(--brand);  /* 진한 파랑 체크 */
+            background: #E3F2FD; 
+            color: var(--brand); 
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -599,7 +592,7 @@
             </div>
             
             <!<button class="emergency-btn-lg" onclick="window.app.triggerEmergencyCall()">
-              <!  <span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
+                <!<span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
             <!</button>
 
             <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px; text-align: center;">
@@ -1013,7 +1006,9 @@
             document.querySelector(`button[data-tab="${tabId}"]`).classList.add('active');
             if (tabId === 'chat') window.app.dismissAlert();
             
-            document.getElementById('ticket-count-home').innerText = tickets + "회";
+            // [수정된 부분] 자바스크립트에서는 숫자만 업데이트합니다. (HTML에 '회'가 이미 있음)
+            document.getElementById('ticket-count-home').innerText = tickets;
+            
             document.getElementById('mypage-tickets').innerText = tickets;
             document.getElementById('pay-modal-ticket-cnt').innerText = tickets;
         },
@@ -1089,7 +1084,6 @@
             }
         },
 
-        // [수정] 119 전화 연결 함수
         triggerEmergencyCall: () => {
             if(confirm("🚨 위급 상황이신가요?\n119 안전신고센터로 연결합니다.")) {
                 window.location.href = "tel:119"; 
@@ -1240,10 +1234,9 @@
 					window.chat.mode = 'human'; 
 					document.getElementById('chat-mode-selector').style.display = 'none';
 
-            // [수정된 부분] 헤더를 '전문가 상담' 스타일로 변경
 					headerLabel.innerHTML = '<b>전문가 상담 (1:1)</b> · 익명 보장';
-					headerLabel.style.background = '#E3FAFC'; // 파란색 배경 (전문가용)
-					headerLabel.style.color = '#0C8599';      // 파란색 글씨
+					headerLabel.style.background = '#E3FAFC'; 
+					headerLabel.style.color = '#0C8599';      
 
 					window.chat.addMsg('system', '🔒 전문가와 연결되었습니다. (익명 보장)');
 				} else {
@@ -1255,10 +1248,9 @@
 			} else {
 				window.chat.mode = 'ai';
         
-        // [수정된 부분] 헤더를 다시 'AI 상담' 스타일로 원복
 				headerLabel.innerHTML = '<b>AI 상담 (24h)</b> · 익명 보장';
-				headerLabel.style.background = '#E8F5E9'; // 초록색 배경 (기본)
-				headerLabel.style.color = '#2E7D32';      // 초록색 글씨
+				headerLabel.style.background = '#E8F5E9'; 
+				headerLabel.style.color = '#2E7D32';      
 
 				window.app.switchTab('chat');
 			}
@@ -1305,7 +1297,6 @@
             }
         },
 
-        // [수정] 닥터 이름 변경 로직 (Dr. Mind / Dr. Re) 적용
         addMsg: (type, text) => {
             const container = document.getElementById('msg-container');
             const div = document.createElement('div');
