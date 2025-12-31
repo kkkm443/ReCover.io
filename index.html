@@ -141,7 +141,7 @@
             position: relative; 
         }
 
-        /* 탭 전환 전용 애니메이션 (기존 유지) */
+        /* 탭 전환 전용 애니메이션 */
         @keyframes tabFade { 
             from { opacity:0; transform:translateY(10px); } 
             to { opacity:1; transform:translateY(0); } 
@@ -242,7 +242,10 @@
             border-radius: 16px;
             font-weight: 800;
             font-size: 15px;
-			margin-top: 10px;
+            
+            /* [수정] 위쪽 여백 추가 (간격 벌리기) */
+            margin-top: 16px; 
+            
             margin-bottom: 16px;
             cursor: pointer;
             display: flex;
@@ -334,7 +337,9 @@
            ========================================= */
         #tab-chat { display: none; flex-direction: column; height: 100%; padding: 0; background: #fff; position: relative; }
         #tab-chat.active { display: flex; }
-		.chat-top-bar { 
+
+        /* [수정] 상단 바 정렬 완벽 수정 */
+        .chat-top-bar { 
             position: relative;       /* ◀ 중요: 자식 요소(배지)의 기준점이 됩니다 */
             height: 60px;
             padding: 0 20px;
@@ -345,7 +350,7 @@
             align-items: center; 
         }
 
-        /* 중앙 배지: 절대 위치로 정중앙 고정 */
+        /* [수정] 중앙 배지: 절대 위치로 정중앙 고정 */
         .chat-secure-label { 
             position: absolute;       /* ◀ 중요: 흐름에서 벗어나 독자적으로 위치 잡기 */
             left: 50%;                /* 부모의 50% 지점으로 이동 */
@@ -365,7 +370,7 @@
             white-space: nowrap;      /* 줄바꿈 방지 */
         }
 
-        /* 좌우 버튼 공통 스타일 (햄버거, 다시선택) */
+        /* [수정] 좌우 버튼 공통 스타일 (햄버거, 다시선택) */
         .chat-top-bar button {
             display: flex;            /* 버튼 내부도 flex로 정렬 */
             align-items: center; 
@@ -376,7 +381,7 @@
             cursor: pointer;
         }
 
-        /* 우측 '다시 선택' 버튼 전용 스타일 */
+        /* [수정] 우측 '다시 선택' 버튼 전용 스타일 */
         .chat-reset-btn {
             border: 1px solid #eee !important; /* !important로 덮어쓰기 */
             background: white !important;
@@ -387,6 +392,7 @@
             color: #666;
             gap: 4px;
         }
+
         .chat-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
         .msg { max-width: 80%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: keep-all; }
         .msg.ai { background: #F1F3F5; align-self: flex-start; border-top-left-radius: 2px; }
@@ -439,6 +445,8 @@
         #breathing-guide { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
         #breathing-guide.active { display: flex; animation: fadeIn 0.5s; }
         .breath-circle { width: 90px; height: 90px; background: var(--healing); border-radius: 50%; box-shadow: 0 0 30px var(--healing); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; margin-bottom: 40px; transition: all 4s ease-in-out; }
+        
+        /* [수정] 호흡 가이드 글자 겹침 방지 여백 추가 */
         .breath-text {font-size: 24px; font-weight: bold; margin-bottom: 40px; transition: opacity 0.3s;}
 		
         #emergency-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; background: #fff; padding: 25px; border-radius: 20px; border: 3px solid var(--danger); text-align: center; box-shadow: 0 10px 50px rgba(255, 107, 107, 0.4); z-index: 400; display: none; }
@@ -455,6 +463,85 @@
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+
+        /* [새로 추가됨] 안심 안내 팝업 전용 스타일 */
+        .new-privacy-card {
+            background: white;
+            width: 85%;
+            max-width: 320px;
+            padding: 40px 25px;
+            border-radius: 30px; /* 둥글게 */
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .p-title {
+            color: var(--brand); /* 파란색 */
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .p-desc {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .p-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .p-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+
+        .p-icon {
+            min-width: 24px;
+            height: 24px;
+            background: #E3F2FD; /* 연한 파랑 배경 */
+            color: var(--brand);  /* 진한 파랑 체크 */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .p-footer {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 25px;
+        }
+
+        .p-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--brand);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .p-btn:active {
+            transform: scale(0.98);
+            background: #3378c9;
+        }
     </style>
 </head>
 <body>
@@ -464,7 +551,7 @@
         <div class="logo" onclick="window.app.handleLogoClick()">
             <span style="color:var(--brand);">RE:COVER</span>
         </div>
-        <div class="secure-badge" id="privacy-btn">🔒 인사팀 기록 미제공</div>
+        <div class="secure-badge" id="privacy-btn">🔒 내 기록 보호중</div>
     </header>
 
     <div class="watch-bar" id="watch-status" onclick="window.app.toggleWatchConnection()">
@@ -505,18 +592,18 @@
                 </div>
             </div>
             
-            <button class="emergency-btn-lg" onclick="window.app.triggerEmergencyAI()">
-                <span style="font-size:20px;">🚨</span> 긴급 도움 요청 (AI 우선)
-            </button>
+            <!<button class="emergency-btn-lg" onclick="window.app.triggerEmergencyCall()">
+                <!<span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
+            <!</button>
 
-            <div class="card" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; margin-top:16px;">
-                <h3 style="margin:0 0 5px 0;">팀장님 모르게 상담받기</h3>
+            <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px;">
+                <h3 style="margin:0 0 5px 0;">회사 모르게 상담받기</h3>
                 <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">
                     임직원 전용 1:1 심리상담권이<br><b id="ticket-count-home" style="font-size:16px; color:#FFEAA7;">3회</b> 남아있습니다.
                 </p>
                 <div style="display:flex; gap:10px;">
-                    <button id="connect-human-btn" style="flex:1; background:white; color:#6c5ce7; border:none; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">지금 바로 연결</button>
-                    <button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">📅 전문가 예약</button>
+                    <button id="connect-human-btn" style="flex:1; background:white; color:#4496F5; border:none; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">지금 바로 연결</button>
+                    <button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">전문가 예약</button>
                 </div>
             </div>
         </div>
@@ -545,8 +632,9 @@
                     <p style="font-size:12px; color:#666;">"이렇게 해보세요" <br> 실질적인 조언이 필요해요.</p>
                 </div>
             </div>
+            
             <div class="chat-top-bar">
-				<button onclick="window.chat.toggleSidebar()" style="border:none; background:none; font-size:20px; cursor:pointer;">≡</button>
+				<button onclick="window.chat.toggleSidebar()" style="font-size:20px;">≡</button>
     
 				<div class="chat-secure-label" id="chat-header-label">🤖 AI 상담 (24h) · 익명 보장</div>
     
@@ -554,6 +642,7 @@
 				🔄 다시 선택
 				</button>
 			</div>
+
             <div class="chat-area" id="msg-container"></div>
             <div class="chat-input-box">
                 <input type="text" id="input-msg" placeholder="오늘 어떤 일이 있었나요?">
@@ -859,15 +948,31 @@
 </div>
 
 <div class="modal-bg" id="privacy-modal" onclick="this.style.display='none'">
-    <div class="card" style="width:80%; max-width:300px; text-align:center;" onclick="event.stopPropagation()">
-        <div style="font-size:40px; margin-bottom:10px;">🛡️</div>
-        <h3>안심하세요</h3>
-        <p style="font-size:13px; color:#666; text-align:left;">
-            1. <b>의료기록 미생성:</b> 심리 '코칭' 분류<br>
-            2. <b>데이터 분리:</b> 사내망과 분리된 서버<br>
-            3. <b>인사팀 제공 정보:</b><br>❌ 개인정보 (미제공)<br>✅ 팀별 통계 (제공)
-        </p>
-        <button onclick="document.getElementById('privacy-modal').style.display='none'" style="width:100%; padding:10px; background:var(--brand); color:white; border:none; border-radius:8px; cursor:pointer;">확인</button>
+    <div class="new-privacy-card" onclick="event.stopPropagation()">
+        
+        <div class="p-title">안심하고 이용하세요</div>
+        <div class="p-desc">언제든 편히 상담할 수 있도록<br>정보가 보호되고 있습니다</div>
+
+        <div class="p-list">
+            <div class="p-item">
+                <div class="p-icon">✔</div>
+                <span>의료기록으로 남지 않아요</span>
+            </div>
+            <div class="p-item">
+                <div class="p-icon">✔</div>
+                <span>사내망과 분리된 서버를 사용해요</span>
+            </div>
+            <div class="p-item">
+                <div class="p-icon">✔</div>
+                <span>인사팀에 내 정보가 제공되지 않아요</span>
+            </div>
+        </div>
+
+        <div class="p-footer">
+            꼭 필요한 팀별 통계만 공개되어 개인정보는 알 수 없어요
+        </div>
+
+        <button class="p-btn" onclick="document.getElementById('privacy-modal').style.display='none'">확인했어요</button>
     </div>
 </div>
 
@@ -973,14 +1078,10 @@
             }
         },
 
-        triggerEmergencyAI: () => {
-            if(confirm("🚨 긴급 도움 모드를 실행하시겠습니까? \n즉시 AI 상담이 시작됩니다.")) {
-                window.app.switchTab('chat');
-                window.chat.selectMode('solution'); 
-                setTimeout(() => {
-                    document.getElementById('input-msg').value = "지금 너무 힘들어요. 긴급 도움이 필요합니다.";
-                    window.chat.send(); 
-                }, 500);
+        // [수정] 119 전화 연결 함수
+        triggerEmergencyCall: () => {
+            if(confirm("🚨 위급 상황이신가요?\n119 안전신고센터로 연결합니다.")) {
+                window.location.href = "tel:119"; 
             }
         },
 
@@ -1193,29 +1294,26 @@
             }
         },
 
+        // [수정] 닥터 이름 변경 로직 (Dr. Mind / Dr. Re) 적용
         addMsg: (type, text) => {
             const container = document.getElementById('msg-container');
             const div = document.createElement('div');
 
-            // 1. 전문가일 때 (기존 유지)
             if (type === 'expert') {
                 div.className = `msg expert`; 
                 div.innerHTML = `<span style="display:block; font-size:10px; font-weight:bold; margin-bottom:4px; color:#0C8599;">👩‍⚕️ 상담사 Kim</span>${text}`;
     
-            // 2. [수정됨] AI일 때 (모드에 따라 이름 변경 로직 추가)
             } else if (type === 'ai') {
                 div.className = `msg ai`;
                 
-                // [여기서 이름 결정] 현재 선택된 모드 확인
-                let doctorName = "Dr. Mind"; // 기본: 공감 중심
+                // 모드에 따라 이름 결정
+                let doctorName = "Dr. Mind"; 
                 if (window.chat.selectedMode === 'solution') {
-                    doctorName = "Dr. Re";   // 해결 중심일 때 이름 변경
+                    doctorName = "Dr. Re";   
                 }
 
-                // 결정된 이름(doctorName)을 화면에 표시
                 div.innerHTML = `<span style="display:block; font-size:10px; font-weight:bold; margin-bottom:4px; color:#2E7D32;">🤖 ${doctorName}</span>${text}`;
 
-            // 3. 사용자(user)나 시스템(system) 메시지일 때
             } else {
                 div.className = `msg ${type}`; 
                 div.innerHTML = text;
