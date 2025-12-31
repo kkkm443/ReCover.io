@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RE:COVER Enterprise</title>
+    <title>RE:COVER</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -12,7 +12,7 @@
            1. DESIGN SYSTEM
            ========================================= */
         :root {
-            --brand: #0066FF;
+            --brand: #4496F5;
             --brand-sub: #E3F2FD;
             --healing: #00D2BA;
             --danger: #FF6B6B;
@@ -242,6 +242,7 @@
             border-radius: 16px;
             font-weight: 800;
             font-size: 15px;
+			margin-top: 10px;
             margin-bottom: 16px;
             cursor: pointer;
             display: flex;
@@ -387,7 +388,8 @@
         #breathing-guide { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
         #breathing-guide.active { display: flex; animation: fadeIn 0.5s; }
         .breath-circle { width: 90px; height: 90px; background: var(--healing); border-radius: 50%; box-shadow: 0 0 30px var(--healing); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; text-align: center; margin-bottom: 40px; transition: all 4s ease-in-out; }
-        
+        .breath-text {font-size: 24px; font-weight: bold; margin-bottom: 40px; transition: opacity 0.3s;}
+		
         #emergency-popup { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; background: #fff; padding: 25px; border-radius: 20px; border: 3px solid var(--danger); text-align: center; box-shadow: 0 10px 50px rgba(255, 107, 107, 0.4); z-index: 400; display: none; }
         #emergency-popup.show { display: block; animation: shake 0.5s; }
         @keyframes shake { 0% { transform: translate(-50%, -50%) rotate(0deg); } 25% { transform: translate(-52%, -50%) rotate(-5deg); } 75% { transform: translate(-48%, -50%) rotate(5deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
@@ -493,10 +495,14 @@
                 </div>
             </div>
             <div class="chat-top-bar">
-                <button onclick="window.chat.toggleSidebar()" style="border:none; background:none; font-size:20px; cursor:pointer;">≡</button>
-                <div class="chat-secure-label">AI 상담 (24h) · 익명 보장 🛡️</div>
-                <div style="width:20px;"></div>
-            </div>
+				<button onclick="window.chat.toggleSidebar()" style="border:none; background:none; font-size:20px; cursor:pointer;">≡</button>
+    
+				<div class="chat-secure-label" id="chat-header-label">🤖 AI 상담 (24h) · 익명 보장</div>
+    
+				<button onclick="window.chat.resetMode()" style="border:1px solid #ddd; background:white; border-radius:12px; font-size:11px; padding:5px 10px; cursor:pointer; color:#666;">
+				🔄 다시 선택
+				</button>
+			</div>
             <div class="chat-area" id="msg-container"></div>
             <div class="chat-input-box">
                 <input type="text" id="input-msg" placeholder="오늘 어떤 일이 있었나요?">
@@ -1060,25 +1066,40 @@
         },
 
         goChat: (targetMode) => {
-            if (targetMode === 'human') {
-                if(tickets > 0) {
-                    tickets--;
-                    window.app.switchTab('chat'); 
-                    alert(`상담권이 차감되었습니다. (잔여: ${tickets}회)`);
-                    window.chat.mode = 'human'; 
-                    document.getElementById('chat-mode-selector').style.display = 'none';
-                    window.chat.addMsg('system', '🔒 전문가와 연결되었습니다. (익명 보장)');
-                } else {
-                    if(confirm("잔여 상담권이 없습니다. 상담권을 충전하시겠습니까?")) {
-                        document.getElementById('payment-modal').style.display='flex';
-                    }
-                    return;
-                }
-            } else {
-                window.chat.mode = 'ai';
-                window.app.switchTab('chat');
-            }
-        },
+		const headerLabel = document.getElementById('chat-header-label');
+
+			if (targetMode === 'human') {
+				if(tickets > 0) {
+					tickets--;
+					window.app.switchTab('chat'); 
+					alert(`상담권이 차감되었습니다. (잔여: ${tickets}회)`);
+            
+					window.chat.mode = 'human'; 
+					document.getElementById('chat-mode-selector').style.display = 'none';
+
+            // [수정된 부분] 헤더를 '전문가 상담' 스타일로 변경
+					headerLabel.innerHTML = '<b>전문가 상담 (1:1)</b> · 익명 보장';
+					headerLabel.style.background = '#E3FAFC'; // 파란색 배경 (전문가용)
+					headerLabel.style.color = '#0C8599';      // 파란색 글씨
+
+					window.chat.addMsg('system', '🔒 전문가와 연결되었습니다. (익명 보장)');
+				} else {
+					if(confirm("잔여 상담권이 없습니다. 상담권을 충전하시겠습니까?")) {
+						document.getElementById('payment-modal').style.display='flex';
+					}
+					return;
+				}
+			} else {
+				window.chat.mode = 'ai';
+        
+        // [수정된 부분] 헤더를 다시 'AI 상담' 스타일로 원복
+				headerLabel.innerHTML = '<b>AI 상담 (24h)</b> · 익명 보장';
+				headerLabel.style.background = '#E8F5E9'; // 초록색 배경 (기본)
+				headerLabel.style.color = '#2E7D32';      // 초록색 글씨
+
+				window.app.switchTab('chat');
+			}
+		},
 
         connectExpertDirect: () => {
             document.getElementById('emergency-popup').classList.remove('show');
@@ -1124,13 +1145,31 @@
         addMsg: (type, text) => {
             const container = document.getElementById('msg-container');
             const div = document.createElement('div');
+
+            // 1. 전문가일 때 (기존 유지)
             if (type === 'expert') {
                 div.className = `msg expert`; 
-                div.innerHTML = `<span style="display:block; font-size:10px; font-weight:bold; margin-bottom:4px; color:#0C8599;">상담사 Kim</span>${text}`;
+                div.innerHTML = `<span style="display:block; font-size:10px; font-weight:bold; margin-bottom:4px; color:#0C8599;">👩‍⚕️ 상담사 Kim</span>${text}`;
+    
+            // 2. [수정됨] AI일 때 (모드에 따라 이름 변경 로직 추가)
+            } else if (type === 'ai') {
+                div.className = `msg ai`;
+                
+                // [여기서 이름 결정] 현재 선택된 모드 확인
+                let doctorName = "Dr. Mind"; // 기본: 공감 중심
+                if (window.chat.selectedMode === 'solution') {
+                    doctorName = "Dr. Re";   // 해결 중심일 때 이름 변경
+                }
+
+                // 결정된 이름(doctorName)을 화면에 표시
+                div.innerHTML = `<span style="display:block; font-size:10px; font-weight:bold; margin-bottom:4px; color:#2E7D32;">🤖 ${doctorName}</span>${text}`;
+
+            // 3. 사용자(user)나 시스템(system) 메시지일 때
             } else {
                 div.className = `msg ${type}`; 
                 div.innerHTML = text;
             }
+
             container.appendChild(div); 
             container.scrollTop = container.scrollHeight;
             window.chat.currentMessages.push({type, text, time: new Date().toLocaleTimeString()});
@@ -1182,6 +1221,21 @@
                 document.getElementById('msg-container').innerHTML = '';
                 document.getElementById('history-list').innerHTML = '<div style="padding:20px; text-align:center; color:#999;">삭제되었습니다.</div>';
                 alert('모든 기록이 안전하게 삭제되었습니다.');
+            }
+        },
+		resetMode: () => {
+            if(confirm("대화 모드를 다시 선택하시겠습니까?")) {
+                document.getElementById('chat-mode-selector').style.display = 'flex';
+                
+                const headerLabel = document.getElementById('chat-header-label');
+                headerLabel.innerHTML = '🤖 <b>AI 상담 (24h)</b> · 익명 보장';
+                headerLabel.style.background = '#E8F5E9';
+                headerLabel.style.color = '#2E7D32';
+
+                window.chat.mode = 'ai';
+                window.chat.selectedMode = null;
+                
+                window.chat.addMsg('system', '🔄 상담 유형 선택 화면으로 돌아갑니다.');
             }
         }
     };
