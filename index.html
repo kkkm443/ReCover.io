@@ -8,6 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+		@font-face {
+            font-family: 'Toss Face';
+            src: url('https://cdn.jsdelivr.net/gh/toss/tossface/dist/TossFaceFontMac.ttf') format('truetype');
+            font-display: swap;
+			unicode-range: U+1F000-1FAFF, U+2600-26FF, U+2700-27BF, U+2300-23FF, U+2B50, U+2B55, U+2934, U+2935;
+        }
         /* =========================================
            1. DESIGN SYSTEM
            ========================================= */
@@ -33,7 +39,7 @@
         body { 
             margin: 0; 
             background: var(--bg-base); 
-            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif; 
+			font-family: "Toss Face", -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
             display: flex; 
             justify-content: center; 
             height: 100vh; 
@@ -78,8 +84,8 @@
 
         .secure-badge { 
             font-size: 11px; 
-            background: #E8F5E9; 
-            color: #2E7D32; 
+            background: #DDEBF6; 
+            color: #4496F5; 
             padding: 4px 8px; 
             border-radius: 4px; 
             font-weight: 700; 
@@ -551,7 +557,7 @@
         <div class="logo" onclick="window.app.handleLogoClick()">
             <span style="color:var(--brand);">RE:COVER</span>
         </div>
-        <div class="secure-badge" id="privacy-btn">🔒 내 기록 보호중</div>
+        <div class="secure-badge" id="privacy-btn">🛡️ 내 기록 보호중</div>
     </header>
 
     <div class="watch-bar" id="watch-status" onclick="window.app.toggleWatchConnection()">
@@ -575,7 +581,7 @@
                 <div class="chart-wrap"><canvas id="liveChart"></canvas></div>
                 <div class="stress-summary-text">
                     <span class="stress-trend-badge">📉 전주 대비 15% 감소</span><br>
-                    최근 3일간 급격한 스트레스 스파이크가 발견되지 않았습니다. 현재 상태는 매우 안정적입니다.
+                    최근 3일간 급격한 스트레스 스파이크가 발견되지 않았어요.<br> 현재 상태는 매우 안정적이에요.
                 </div>
             </div>
             
@@ -593,17 +599,22 @@
             </div>
             
             <!<button class="emergency-btn-lg" onclick="window.app.triggerEmergencyCall()">
-                <!<span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
+              <!  <span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
             <!</button>
 
-            <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px;">
-                <h3 style="margin:0 0 5px 0;">회사 모르게 상담받기</h3>
-                <p style="font-size:13px; opacity:0.9; margin-bottom:15px;">
-                    임직원 전용 1:1 심리상담권이<br><b id="ticket-count-home" style="font-size:16px; color:#FFEAA7;">3회</b> 남아있습니다.
+            <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px; text-align: center;">
+                <div style="font-size: 40px; margin-bottom: 5px;">💬</div>
+                <h3 style="margin:0 0 10px 0;">회사 모르게 상담받기</h3>
+                <p style="font-size:14px; opacity:0.9; margin-bottom:20px;">
+                    임직원 전용 1:1 심리상담권이<br>
+                    <span style="font-size:18px; color:#FFEAA7; font-weight:800;">
+                        <span id="ticket-count-home">3</span>회
+                    </span> 
+                    남아있어요
                 </p>
                 <div style="display:flex; gap:10px;">
-                    <button id="connect-human-btn" style="flex:1; background:white; color:#4496F5; border:none; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">지금 바로 연결</button>
-                    <button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;">전문가 예약</button>
+                    <button id="connect-human-btn" style="flex:1; background:white; color:#4496F5; border:none; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">지금 바로 연결</button>
+                    <button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">전문가 예약</button>
                 </div>
             </div>
         </div>
@@ -657,8 +668,8 @@
                     <span class="ai-insight-badge">NEW</span>
                 </div>
                 <p style="font-size:14px; line-height:1.6; margin-bottom:10px;">
-                    "최근 2주간 <b>회복 경향</b>이 보입니다.<br>
-                    오늘은 점심시간에 10분 정도 햇살을 받으며 산책은 어떠신가요?"
+                    최근 2주간 <b>회복 경향</b>이 보입니다.<br>
+                    오늘은 점심시간에 햇살 받으며 10분 정도 산책 어떠신가요?
                 </p>
                 <div style="font-size:11px; color:#888; text-align:right;">Analysis by RE:COVER AI</div>
             </div>
