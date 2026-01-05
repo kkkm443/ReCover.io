@@ -643,11 +643,11 @@
 					<span id="mood-reward-badge" style="font-size:12px; color:#00D2BA;">+50P 적립</span>
 				</div>
 				<div class="mood-container">
-					<button class="mood-btn" onclick="window.app.recordMood('happy', '😊')">😊</button>
-					<button class="mood-btn" onclick="window.app.recordMood('calm', '😌')">😌</button>
-					<button class="mood-btn" onclick="window.app.recordMood('tired', '😑')">😑</button>
-					<button class="mood-btn" onclick="window.app.recordMood('sad', '😢')">😢</button>
-					<button class="mood-btn" onclick="window.app.recordMood('angry', '🔥')">🔥</button>
+					<button class="mood-btn" data-mood="happy" onclick="window.app.recordMood('happy', '😊')">😊</button>
+					<button class="mood-btn" data-mood="calm" onclick="window.app.recordMood('calm', '😌')">😌</button>
+					<button class="mood-btn" data-mood="tired" onclick="window.app.recordMood('tired', '😑')">😑</button>
+					<button class="mood-btn" data-mood="sad" onclick="window.app.recordMood('sad', '😢')">😢</button>
+					<button class="mood-btn" data-mood="angry" onclick="window.app.recordMood('angry', '🔥')">🔥</button>
 				</div>
 				<div id="mood-status-msg" style="display:none; margin-top:15px; font-size:14px; color:var(--brand); text-align:center; font-weight:600;">
 					마음을 기록해주셔서 감사합니다! 🪙 +50P
@@ -1072,18 +1072,20 @@
 
 <script type="module">
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-    const API_KEY = "AIzaSyCsKWMEiuL1w3XjZlvGNnCzlm3V4MEqm4A"; 
+    const API_KEY = "api예시"; 
 
     let genAI = null; 
     let chatSession = null; 
     let isAIReady = false; 
     let tickets = 3;
     let chatHistory = JSON.parse(localStorage.getItem('mindChatHistory')) || [];
-
+	
+	const todayStr = new Date().toISOString().split('T')[0];
     // 1. App Controller
     window.app = {
 		userPoints: parseInt(localStorage.getItem('re_points')) || 0,
-		moodRecorded: false,
+		moodRecorded: localStorage.getItem('lastMoodDate') === todayStr,
+		selectedMood: localStorage.getItem('lastMoodType') || null,
         currentTab: 'home', 
         alertDismissed: false,
         isWatchConnected: true, 
@@ -1327,12 +1329,32 @@
 			if (!window.app.moodRecorded) {
 				window.app.userPoints += 50;
 				window.app.moodRecorded = true;
+				window.app.selectedMood = mood; // 현재 선택 저장
+				
+				// 로컬 스토리지에 오늘 날짜와 선택한 기분 저장
+				localStorage.setItem('lastMoodDate', todayStr);
+				localStorage.setItem('lastMoodType', mood);
+				
 				window.app.updateDisplay();
+				window.app.applyMoodUI(); // 즉시 버튼 색상 적용
+				
 				document.getElementById('mood-status-msg').style.display = 'block';
 				alert(`${emoji} 기분이 기록되었습니다. 50P가 적립되었어요!`);
 			} else {
 				alert("오늘은 이미 기분을 기록하셨습니다.");
 			}
+		},
+		
+		applyMoodUI: () => {
+			const buttons = document.querySelectorAll('.mood-btn');
+			buttons.forEach(btn => {
+				// 버튼의 onclick 텍스트나 인자를 확인해 어떤 기분인지 판별
+				if (btn.getAttribute('onclick').includes(`'${window.app.selectedMood}'`)) {
+					btn.classList.add('selected'); // 선택된 버튼에 파란 테두리 적용
+				} else {
+					btn.classList.remove('selected');
+				}
+			});
 		},
 		
 		showTicketSuccessModal: () => {
@@ -1366,8 +1388,6 @@
 				
 				[대화 기법 및 스타일]
 				1. 전문가적 톤: 따뜻하고 부드럽지만, 신뢰감을 주는 정중한 '해요체'를 사용하세요. (지나친 이모티콘 남발 금지, 가벼운 말투 금지)
-				2. 인지행동치료(CBT) 접근: 내담자가 부정적인 생각에 빠져 있다면, 그 생각의 근거를 부드럽게 점검해 주세요. (예: "그렇게 생각하게 된 구체적인 계기가 있었을까요?")
-				3. 구체화 질문: "힘들다"고 하면 막연히 위로하기보다 "구체적으로 어떤 상황에서 가장 힘드셨나요?"라고 물어 감정을 세분화하세요.
 				
                 [필수 안전 프로토콜 (매우 중요)]
                 1. 위기 개입: 내담자가 '죽고 싶다', '자해', '살기 싫다', '뛰어내리고 싶다' 등의 자살/자해 징후를 보이면 상담을 중단하고 즉시 아래 메시지를 출력하세요.
@@ -1424,13 +1444,27 @@
             window.chat.addMsg('ai', welcomeMsg);
 
             if (API_KEY) {
-                try {
-                    genAI = new GoogleGenerativeAI(API_KEY);
-                    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", systemInstruction: fullSystemInstruction });
-                    chatSession = model.startChat({ history: [] });
-                    isAIReady = true;
-                } catch (e) { console.error(e); }
-            }
+				try {
+					genAI = new GoogleGenerativeAI(API_KEY);
+					
+					// 사용자님이 말씀하신 gemini-3-flash-preview 모델을 그대로 사용합니다.
+					const model = genAI.getGenerativeModel({ 
+						model: "gemini-3-flash-preview", 
+						generationConfig: {
+							temperature: 0.8,      // 대화의 유연함을 위해 약간 높게 설정
+							maxOutputTokens: 2048, // Gemini 3의 긴 출력 능력을 활용
+						},
+						systemInstruction: fullSystemInstruction 
+					});
+
+					chatSession = model.startChat({ history: [] });
+					isAIReady = true;
+					console.log("Gemini 3 상담 시스템이 준비되었습니다.");
+				} catch (e) { 
+					console.error("AI 초기화 실패:", e); 
+					window.chat.addMsg('system', '상담 시스템 초기화에 실패했습니다. API 키나 네트워크를 확인해주세요.');
+				}
+			}
         },
 
         goChat: (targetMode) => {
@@ -1738,7 +1772,10 @@
         document.getElementById('connect-human-btn').onclick = () => window.chat.goChat('human');
         document.getElementById('sos-btn').onclick = () => window.chat.goChat('human');
         document.getElementById('btn-book-expert').onclick = window.booking.open;
-        
+        if (window.app.moodRecorded) {
+        document.getElementById('mood-status-msg').style.display = 'block';
+        window.app.applyMoodUI(); // 저장된 기분 버튼을 눌러진 상태로 표시
+		}
         sensor.init();
     });
 </script>
