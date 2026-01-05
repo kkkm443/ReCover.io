@@ -326,25 +326,67 @@
 
         /* Ticket Wallet */
         .ticket-wallet {
-            background: #2D3436;
-            color: white;
-            padding: 20px;
-            border-radius: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .wallet-btn {
-            background: white;
-            color: #2D3436;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            cursor: pointer;
-        }
+		background: #2D3436; /* 다크 테마 유지 */
+		color: white;
+		padding: 24px;
+		border-radius: 20px;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 20px;
+		}
+
+		.wallet-info {
+			flex: 1;
+		}
+
+		.wallet-label {
+			font-size: 13px;
+			opacity: 0.8;
+			margin-bottom: 4px;
+		}
+
+		.wallet-value {
+			font-size: 28px;
+			font-weight: 800;
+		}
+
+		.wallet-subtext {
+			font-size: 11px;
+			opacity: 0.5;
+			margin-top: 4px;
+		}
+
+		.wallet-actions {
+			display: flex;
+			flex-direction: column; /* 버튼을 세로로 배치하여 가독성 향상 */
+			gap: 8px;
+		}
+
+		.wallet-btn {
+			border: none;
+			padding: 10px 16px;
+			border-radius: 12px;
+			font-weight: 700;
+			font-size: 13px;
+			cursor: pointer;
+			white-space: nowrap;
+			transition: 0.2s;
+		}
+
+		.wallet-btn.charge { 
+			background: white; 
+			color: #2D3436; 
+		}
+
+		.wallet-btn.exchange { 
+			background: var(--brand); /* 브랜드 컬러 사용 */
+			color: white; 
+		}
+
+		.wallet-btn:active {
+			transform: scale(0.96);
+		}
 
         /* =========================================
            4. CHAT, BOOKING, ADMIN, MODALS
@@ -550,11 +592,30 @@
             transform: scale(0.98);
             background: #3378c9;
         }
+		/* [색감 수정] 포인트 바 배경 및 테두리를 브랜드 블루 톤으로 변경 */
+		#point-bar { 
+			background: var(--brand-sub); padding: 10px 20px; font-size: 14px; 
+			display: flex; justify-content: space-between; align-items: center; 
+			border-bottom: 1px solid #DDEBF6; z-index: 25; 
+		}
+		.mood-container { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+		.mood-btn { 
+			background: #f1f3f5; border: none; font-size: 26px; padding: 12px; 
+			border-radius: 14px; cursor: pointer; transition: 0.2s; flex: 1; 
+		}
+		.mood-btn.selected { background: var(--brand-sub); border: 2px solid var(--brand); }
+		#mood-status-msg { margin-top:15px; font-size:14px; color:var(--brand); text-align:center; font-weight:600; }
     </style>
 </head>
 <body>
 
 <div id="app-frame">
+	<div id="point-bar">
+		<div id="user-tier" style="color: var(--brand); font-weight: bold;">✨ Lv.1 마음꿈나무</div>
+		<div style="font-weight: 800; color: #636E72; cursor: pointer;" onclick="window.app.debugPoints()">
+			🪙 <span id="user-points">0</span> P
+		</div>
+	</div>
     <header>
         <div class="logo" onclick="window.app.handleLogoClick()">
             <span style="color:var(--brand);">RE:COVER</span>
@@ -575,6 +636,23 @@
 
     <main>
         <div id="tab-home" class="tab-content active">
+		
+			<div class="card">
+				<div class="card-title">
+					<span>오늘의 기분은 어떤가요?</span>
+					<span id="mood-reward-badge" style="font-size:12px; color:#00D2BA;">+50P 적립</span>
+				</div>
+				<div class="mood-container">
+					<button class="mood-btn" onclick="window.app.recordMood('happy', '😊')">😊</button>
+					<button class="mood-btn" onclick="window.app.recordMood('calm', '😌')">😌</button>
+					<button class="mood-btn" onclick="window.app.recordMood('tired', '😑')">😑</button>
+					<button class="mood-btn" onclick="window.app.recordMood('sad', '😢')">😢</button>
+					<button class="mood-btn" onclick="window.app.recordMood('angry', '🔥')">🔥</button>
+				</div>
+				<div id="mood-status-msg" style="display:none; margin-top:15px; font-size:14px; color:var(--brand); text-align:center; font-weight:600;">
+					마음을 기록해주셔서 감사합니다! 🪙 +50P
+				</div>
+			</div>
             <div class="card">
                 <div class="card-title">
                     <span>실시간 스트레스 지수</span>
@@ -609,7 +687,7 @@
                 <h3 style="margin:0 0 10px 0;">회사 모르게 상담받기</h3>
                 <p style="font-size:14px; opacity:0.9; margin-bottom:20px;">
                     임직원 전용 1:1 심리상담권이<br>
-                    <span style="font-size:18px; color:#FFEAA7; font-weight:800;">
+                    <span style="font-size:18px; color:#ffffff; font-weight:800;">
                         <span id="ticket-count-home">3</span>회
                     </span> 
                     남아있어요
@@ -710,14 +788,17 @@
                 <p style="margin:0; font-size:13px; color:#666;">마케팅본부 · 마케팅 2팀</p>
             </div>
 
-            <div class="ticket-wallet">
-                <div>
-                    <div style="font-size:12px; opacity:0.8;">내 상담권 잔액</div>
-                    <div style="font-size:24px; font-weight:bold; margin-top:5px;"><span id="mypage-tickets">3</span>회</div>
-                    <div style="font-size:10px; margin-top:5px;">(연 3회 무료 제공)</div>
-                </div>
-                <button class="wallet-btn" onclick="document.getElementById('payment-modal').style.display='flex'">+ 충전하기</button>
-            </div>
+        <div class="ticket-wallet">
+			<div class="wallet-info">
+				<div class="wallet-label">내 상담권 잔액</div>
+				<div class="wallet-value"><span id="mypage-tickets">3</span>회</div>
+				<div class="wallet-subtext">(연 3회 무료 제공)</div>
+			</div>
+			<div class="wallet-actions">
+				<button class="wallet-btn charge" onclick="document.getElementById('payment-modal').style.display='flex'">+ 충전하기</button>
+				<button class="wallet-btn exchange" onclick="document.getElementById('exchange-modal').style.display='flex'; document.getElementById('exchange-modal-points').innerText = window.app.userPoints;">✨ 포인트 교환</button>
+			</div>
+		</div>
 
             <div class="card">
                 <div class="card-title">서비스 설정</div>
@@ -1001,6 +1082,8 @@
 
     // 1. App Controller
     window.app = {
+		userPoints: parseInt(localStorage.getItem('re_points')) || 0,
+		moodRecorded: false,
         currentTab: 'home', 
         alertDismissed: false,
         isWatchConnected: true, 
@@ -1138,7 +1221,124 @@
             document.getElementById('panic-alert').classList.remove('show'); 
             document.getElementById('watch-status').classList.remove('alert'); 
             window.app.alertDismissed = true; 
+        },
+		
+		getTier: (points) => {
+			if (points >= 6000) return "🌲 Lv.5 마음의 숲";
+			if (points >= 4000) return "🌳 Lv.4 마음정원사";
+			if (points >= 2000) return "🌸 Lv.3 마음꽃나무";
+			if (points >= 1000) return "🌿 Lv.2 마음새싹";
+			return "✨ Lv.1 마음꿈나무";
+		},
+		
+		updateDisplay: () => {
+        const points = window.app.userPoints;
+        document.getElementById('user-points').innerText = points;
+        document.getElementById('exchange-modal-points').innerText = points;
+        
+        // 칭호 업데이트
+        const tierEl = document.getElementById('user-tier');
+        if (tierEl) tierEl.innerText = window.app.getTier(points);
+
+        document.getElementById('ticket-count-home').innerText = tickets;
+        document.getElementById('mypage-tickets').innerText = tickets;
+        
+        // 브라우저에 포인트 저장
+        localStorage.setItem('re_points', points);
+		},
+		
+
+		// 2. 상담권 교환 함수
+		exchangeTicket: (cost) => {
+			if (window.app.userPoints >= cost) {
+				// [추가] 확인창 단계
+				if (!confirm(`${cost}P를 사용하여 상담권 1회를 교환하시겠습니까?`)) return;
+
+				window.app.userPoints -= cost;
+				tickets++; // 전역 tickets 변수 증가
+				window.app.updateDisplay();
+				window.app.showTicketSuccessModal();
+				document.getElementById('exchange-modal').style.display = 'none';
+			} else {
+				alert("포인트가 부족합니다.");
+			}
+		},
+
+		debugPoints: () => {
+        const value = prompt("조정할 포인트 값을 입력하세요.\n(예: +1000 또는 -500)", "0");
+        if (value !== null) {
+            const num = parseInt(value);
+            if (!isNaN(num)) {
+                window.app.userPoints += num;
+                if (window.app.userPoints < 0) window.app.userPoints = 0; // 0 미만 방지
+                window.app.updateDisplay();
+            }
         }
+		},
+		
+		// 3. 스타벅스 교환 함수
+		exchangeGifticon: (itemName, cost) => {
+			if (window.app.userPoints >= cost) {
+				if (!confirm(`[${itemName}]을(를) ${cost.toLocaleString()}P로 교환하시겠습니까?`)) return;
+
+				window.app.userPoints -= cost;
+				window.app.updateDisplay();
+
+				document.getElementById('exchange-modal').style.display = 'none';
+				
+				// 1. 모달 내 텍스트 변경
+				const giftNameEl = document.querySelector('#gifticon-modal b');
+				if (giftNameEl) giftNameEl.innerText = itemName;
+				
+				const giftDetailEl = document.getElementById('gift-modal-detail');
+				if (giftDetailEl) giftDetailEl.innerText = itemName + " 1매";
+				
+				// 2. [핵심] 상품명과 현재 시간을 조합해 고유 QR 코드 생성
+				const qrImg = document.querySelector('#gifticon-modal img');
+				if (qrImg) {
+					const uniqueId = Date.now(); // 중복 방지를 위한 타임스탬프
+					const productKey = itemName.replace(/ /g, "_"); 
+					// 상품마다 데이터 값이 달라지므로 찍히는 모양이 변합니다.
+					qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RECOVER_${productKey}_${uniqueId}`;
+				}
+
+				document.getElementById('gifticon-modal').style.display = 'flex';
+			} else {
+				alert("포인트가 부족합니다.");
+			}
+		},
+		exchangeEarlyLeave: (cost) => {
+			if (window.app.userPoints >= cost) {
+				if (!confirm(`[1시간 조기 퇴근권]을 ${cost.toLocaleString()}P로 교환하시겠습니까?\n(사용 시 취소가 불가능합니다)`)) return;
+
+				window.app.userPoints -= cost;
+				window.app.updateDisplay();
+
+				document.getElementById('exchange-modal').style.display = 'none';
+				
+				// 조기 퇴근 전용 모달 표시
+				document.getElementById('early-leave-modal').style.display = 'flex';
+			} else {
+				alert("포인트가 부족합니다. 조금만 더 마음을 기록해보세요!");
+			}
+		},
+		// 4. 기분 기록 시 포인트 적립 함수 (이것도 누락되어 있었습니다)
+		recordMood: (mood, emoji) => {
+			if (!window.app.moodRecorded) {
+				window.app.userPoints += 50;
+				window.app.moodRecorded = true;
+				window.app.updateDisplay();
+				document.getElementById('mood-status-msg').style.display = 'block';
+				alert(`${emoji} 기분이 기록되었습니다. 50P가 적립되었어요!`);
+			} else {
+				alert("오늘은 이미 기분을 기록하셨습니다.");
+			}
+		},
+		
+		showTicketSuccessModal: () => {
+        const modal = document.getElementById('ticket-success-modal');
+        if (modal) modal.style.display = 'flex';
+		}
     };
 
     // 2. Chat Manager
@@ -1448,6 +1648,8 @@
         val: 70,
         
         init: () => {
+			const pointDisplay = document.getElementById('user-points');
+			if(pointDisplay) pointDisplay.innerText = window.app.userPoints;
             const ctx = document.getElementById('liveChart').getContext('2d');
             sensor.chart = new Chart(ctx, { 
                 type: 'line', 
@@ -1540,5 +1742,127 @@
         sensor.init();
     });
 </script>
+<div class="modal-bg" id="exchange-modal" onclick="this.style.display='none'">
+    <div class="card" style="width:90%; max-width:350px;" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">✨ 포인트 교환소</h3>
+            <button onclick="document.getElementById('exchange-modal').style.display='none'" style="border:none; background:none; font-size:20px;">×</button>
+        </div>
+        
+        <div style="background:#e3f2fd; padding:15px; border-radius:10px; margin-bottom:15px; text-align:center; border:1px solid #4496f5;">
+            <p style="margin:0 0 5px 0; font-size:13px; color:#2c3e50;">보유 포인트</p>
+            <div style="font-size:24px; font-weight:bold; color:#2d3436;"><span id="exchange-modal-points">0</span> P</div>
+        </div>
+
+        <div style="display:grid; gap:12px; margin-bottom:20px;">
+            
+            <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:bold; color:var(--brand);">전문가 상담권 1회</div>
+                    <div style="font-size:12px; color:#666;">6,000 P 소요</div>
+                </div>
+                <button onclick="window.app.exchangeTicket(6000)" style="background:var(--brand); color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+            </div>
+
+            <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:bold; color:#1E3932;">스타벅스 아메리카노</div>
+                    <div style="font-size:12px; color:#666;">1,000 P 소요</div>
+                </div>
+                <button onclick="window.app.exchangeGifticon('스타벅스 아메리카노', 1000)" style="background:#1E3932; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+            </div>
+
+            <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:bold; color:#E67E22;">도서문화상품권</div>
+                    <div style="font-size:12px; color:#666;">4,000 P 소요</div>
+                </div>
+                <button onclick="window.app.exchangeGifticon('도서문화상품권', 4000)" style="background:#E67E22; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+            </div>
+
+            <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-weight:bold; color:#9B59B6;">원데이 취미 클래스권</div>
+                    <div style="font-size:12px; color:#666;">10,000 P 소요</div>
+                </div>
+                <button onclick="window.app.exchangeGifticon('원데이 취미 클래스권', 10000)" style="background:#9B59B6; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+            </div>
+			
+			<div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+				<div>
+					<div style="font-weight:bold; color:#ff6b6b;">🚀 한 시간 조기 퇴근권</div>
+					<div style="font-size:12px; color:#666;">15,000 P 소요</div>
+				</div>
+				<button onclick="window.app.exchangeEarlyLeave(15000)" style="background:#ff6b6b; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">승인받기</button>
+			</div>
+
+        </div> 
+	</div>
+</div>
+
+<div class="modal-bg" id="gifticon-modal" onclick="this.style.display='none'">
+    <div class="card" style="width:85%; max-width:320px; padding:0; overflow:hidden; border-radius:20px;" onclick="event.stopPropagation()">
+        <div style="background:var(--brand); color:white; padding:15px; text-align:center; font-weight:bold;">🎉 교환 성공!</div>
+        <div style="padding:20px; text-align:center;">
+            <p style="font-size:14px; color:#333; margin-bottom:15px;">마음 돌봄 포인트로 교환하신<br><b id="gift-modal-title">상품명</b>입니다.</p>
+            
+            <div style="background:#f9f9f9; padding:10px; border-radius:10px; border:1px dashed #ccc;">
+                <img id="gift-modal-qr" src="" alt="바코드" style="width:120px; margin-bottom:10px;">
+                
+                <div id="gift-modal-detail" style="font-weight:bold; color:var(--brand); font-size:16px;">상세 내역</div>
+                <div style="font-size:11px; color:#999; margin-top:5px;">유효기간: 2026.12.31까지</div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('gifticon-modal').style.display='none'" style="width:100%; padding:15px; background:#f1f3f5; border:none; font-weight:bold; cursor:pointer;">닫기</button>
+    </div>
+</div>
+<div class="modal-bg" id="ticket-success-modal" onclick="this.style.display='none'">
+    <div class="card" style="width:85%; max-width:320px; padding:0; overflow:hidden; border-radius:24px; text-align:center;" onclick="event.stopPropagation()">
+        <div style="background:linear-gradient(135deg, #4496F5, #00D2BA); color:white; padding:30px 20px;">
+            <div style="font-size:50px; margin-bottom:10px;">🎟️</div>
+            <h3 style="margin:0; font-size:20px;">교환 완료!</h3>
+        </div>
+        <div style="padding:25px;">
+            <p style="font-size:15px; color:#333; line-height:1.6; margin-bottom:20px;">
+                <b>전문가 상담권</b>이<br>지갑에 안전하게 보관되었습니다.
+            </p>
+                <button onclick="document.getElementById('ticket-success-modal').style.display='none'" 
+				style="width:100%; padding:15px; background:var(--brand); color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer;">
+                확인
+            </button>
+        </div>
+    </div>
+</div>
+<div class="modal-bg" id="early-leave-modal" onclick="this.style.display='none'">
+    <div class="card" style="width:85%; max-width:320px; padding:0; overflow:hidden; border-radius:24px; position:relative;" onclick="event.stopPropagation()">
+        <div style="background:#FF6B6B; color:white; padding:30px 20px; text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">🚀</div>
+            <h3 style="margin:0; font-size:20px; letter-spacing:-1px;">조기 퇴근 승인서</h3>
+            <div style="font-size:12px; opacity:0.8; margin-top:5px;">RE:COVER 보상 시스템 인증됨</div>
+        </div>
+
+        <div style="padding:25px; text-align:center; background:white;">
+            <div style="border:1px solid #eee; padding:20px; border-radius:15px; background:#fffaf0; position:relative;">
+                <div style="position:absolute; right:10px; bottom:10px; width:60px; height:60px; border:3px double #FF6B6B; border-radius:50%; color:#FF6B6B; font-weight:900; display:flex; align-items:center; justify-content:center; transform:rotate(-20deg); opacity:0.6; font-size:14px;">
+                    승인됨
+                </div>
+                
+                <div style="font-size:11px; color:#999; margin-bottom:10px; text-align:left;">발급번호: RC-2026-001</div>
+                <div style="font-size:16px; font-weight:bold; color:#333; margin-bottom:15px;">
+                    위 임직원은 마음 돌봄 보상으로<br>
+                    <span style="color:#FF6B6B; font-size:20px;">'1시간 조기 퇴근'</span>을<br>승인받았습니다.
+                </div>
+                <div style="font-size:12px; color:#666; line-height:1.6;">
+                    사용 시 팀장님께 본 화면을<br>제시해주시기 바랍니다.
+                </div>
+            </div>
+
+            <button onclick="document.getElementById('early-leave-modal').style.display='none'" 
+                    style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; margin-top:20px;">
+                확인
+            </button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
