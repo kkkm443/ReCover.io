@@ -395,15 +395,14 @@
         #tab-chat.active { display: flex; }
 
         .chat-top-bar { 
-            position: relative;       
-            height: 60px;
-            padding: 0 20px;
-            background: #fff; 
-            border-bottom: 1px solid #eee; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
+			display: none; /* 수정: flex에서 none으로 변경 */
+			position: relative;       
+			height: 60px;
+			padding: 0 20px;
+			background: #fff; 
+			border-bottom: 1px solid #eee; 
+			align-items: center; 
+		}
 
         .chat-secure-label { 
             position: absolute;       
@@ -450,7 +449,7 @@
         .msg.ai { background: #F1F3F5; align-self: flex-start; border-top-left-radius: 2px; }
         .msg.user { background: var(--brand); color: white; align-self: flex-end; border-top-right-radius: 2px; }
         .msg.expert { background: #E3FAFC; color: #0C8599; border: 1px solid #99E9F2; align-self: flex-start; border-top-left-radius: 2px; }
-        .chat-input-box { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; background: #fff; }
+        .chat-input-box { padding: 15px; border-top: 1px solid #eee; display: none; gap: 10px; background: #fff; }
         .chat-input-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
         .chat-input-box button { background: var(--brand); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; }
 
@@ -657,6 +656,180 @@
 		}
 		.mood-btn.selected { background: var(--brand-sub); border: 2px solid var(--brand); }
 		#mood-status-msg { margin-top:15px; font-size:14px; color:var(--brand); text-align:center; font-weight:600; }
+		.booking-step-label {
+			font-size: 12px;
+			font-weight: bold;
+			color: #888;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.method-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr 1fr; /* 3분할 */
+			gap: 8px;
+			margin-bottom: 20px;
+		}
+
+		.method-btn {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 5px;
+			padding: 12px;
+			border: 1px solid #eee;
+			background: #f8f9fa;
+			border-radius: 10px;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.method-btn.selected {
+			background: var(--brand-sub);
+			border: 1px solid var(--brand);
+			color: var(--brand);
+			font-weight: bold;
+		}
+
+		.ticket-required-badge {
+			font-size: 10px;
+			padding: 2px 6px;
+			border-radius: 4px;
+			margin-top: 2px;
+			background: #eee;
+			color: #666;
+		}
+
+		.method-btn.selected .ticket-required-badge {
+			background: var(--brand);
+			color: white;
+		}
+		
+		.pay-tab-group {
+		display: flex;
+		background: #f1f3f5;
+		padding: 4px;
+		border-radius: 12px;
+		margin-bottom: 20px;
+		}
+
+		.pay-tab {
+			flex: 1;
+			padding: 10px;
+			border: none;
+			border-radius: 10px;
+			background: transparent;
+			color: #888;
+			font-weight: bold;
+			font-size: 13px;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.pay-tab.active {
+			background: white;
+			color: var(--brand);
+			box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+		}
+
+		.pay-product-list {
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+		}
+
+		.pay-product {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 16px;
+			border: 1px solid #eee;
+			border-radius: 12px;
+			background: white;
+			cursor: pointer;
+			transition: 0.2s;
+		}
+
+		.pay-product:active {
+			transform: scale(0.98);
+			background: #f8f9fa;
+			border-color: var(--brand);
+		}
+
+		.pay-badge {
+			font-size: 10px;
+			background: #FF6B6B;
+			color: white;
+			padding: 2px 6px;
+			border-radius: 4px;
+			margin-left: 5px;
+			vertical-align: middle;
+		}
+		
+		#pg-layer {
+			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: #F2F4F6; z-index: 500; display: none; flex-direction: column;
+			animation: slideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+		}
+
+		.pg-header {
+			background: white; padding: 15px 20px; display: flex; align-items: center;
+			border-bottom: 1px solid #eee;
+		}
+
+		.pg-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+		.pg-section-title {
+			font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; margin-top: 20px;
+		}
+		.pg-section-title:first-child { margin-top: 0; }
+
+		.pg-card {
+			background: white; border-radius: 12px; padding: 20px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 10px;
+		}
+
+		.pg-summary-row {
+			display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #666;
+		}
+		.pg-summary-row.total {
+			margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;
+			color: #333; font-weight: 800; font-size: 18px; align-items: center;
+		}
+		.pg-summary-row.total .price { color: var(--brand); }
+
+		/* 결제 수단 그리드 */
+		.pg-method-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+		.pg-method-btn {
+			border: 1px solid #ddd; background: white; border-radius: 8px;
+			padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+			cursor: pointer; transition: 0.2s;
+		}
+		.pg-method-btn.selected {
+			border-color: var(--brand); background: #E3F2FD; color: var(--brand); font-weight: bold;
+		}
+		.pg-icon { font-size: 20px; }
+
+		/* 약관 동의 */
+		.pg-terms { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; cursor: pointer; }
+		.pg-checkbox {
+			width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%;
+			display: flex; align-items: center; justify-content: center; color: white; transition: 0.2s;
+		}
+		.pg-checkbox.checked { background: var(--brand); border-color: var(--brand); }
+
+		/* 하단 결제 버튼 */
+		.pg-footer {
+			background: white; padding: 20px; border-top: 1px solid #eee;
+			padding-bottom: 30px; /* 아이폰 하단 바 대응 */
+		}
+		.pg-pay-btn {
+			width: 100%; padding: 16px; border: none; border-radius: 12px;
+			background: var(--brand); color: white; font-size: 16px; font-weight: 800;
+			cursor: pointer; transition: 0.2s;
+		}
+		.pg-pay-btn:disabled { background: #ccc; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -729,26 +902,21 @@
                     <span style="font-size:10px; color:#00D2BA;">정시 퇴근</span>
                 </div>
             </div>
-            
-            <!<button class="emergency-btn-lg" onclick="window.app.triggerEmergencyCall()">
-                <!<span style="font-size:20px;"><!🚑</span> <!119 긴급 전화 연결
-            <!</button>
 
             <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px; text-align: center;">
-                <div style="font-size: 40px; margin-bottom: 5px;">💬</div>
-                <h3 style="margin:0 0 10px 0;">회사 모르게 상담받기</h3>
-                <p style="font-size:14px; opacity:0.9; margin-bottom:20px;">
-                    임직원 전용 1:1 심리상담권이<br>
-                    <span style="font-size:18px; color:#ffffff; font-weight:800;">
-                        <span id="ticket-count-home">3</span>회
-                    </span> 
-                    남아있어요
-                </p>
-                <div style="display:flex; gap:10px;">
-                    <button id="connect-human-btn" style="flex:1; background:white; color:#4496F5; border:none; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">지금 바로 연결</button>
-                    <button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">전문가 예약</button>
-                </div>
-            </div>
+				<div style="font-size: 40px; margin-bottom: 5px;">💬</div>
+				<h3 style="margin:0 0 10px 0;">회사 모르게 상담받기</h3>
+				<p style="font-size:14px; opacity:0.9; margin-bottom:20px;">
+					현재 보유 중인 상담권<br>
+					<span style="font-size:15px;">
+						비대면 <b id="home-online-cnt">3</b>회 / 대면 <b id="home-offline-cnt">0</b>회
+					</span> 
+				</p>
+				<div style="display:flex; gap:10px;">
+					<button id="connect-human-btn" style="flex:1; background:white; color:#4496F5; border:none; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">AI 바로 상담</button>
+					<button id="btn-book-expert" style="flex:1; background:rgba(255,255,255,0.2); color:white; border:1px solid white; padding:12px; border-radius:20px; font-weight:bold; cursor:pointer;">전문가 상담 예약</button>
+				</div>
+			</div>
         </div>
 
         <div id="tab-chat" class="tab-content">
@@ -762,19 +930,34 @@
                     <button onclick="window.chat.clearHistory()" style="width:100%; padding:10px; border:1px solid #ddd; background:#fff; border-radius:8px; color:red;">🗑️ 모든 기록 삭제</button>
                 </div>
             </div>
-            <div id="chat-mode-selector">
-                <h3 style="margin-bottom:20px;">어떤 대화를 원하시나요?</h3>
-                <div class="mode-card empathy" onclick="window.chat.selectMode('empathy')">
-                    <div style="font-size:30px;">🧸</div>
-                    <h4>공감 중심</h4>
-                    <p style="font-size:12px; color:#666;">"많이 힘드셨군요" <br> 따뜻한 위로가 필요해요.</p>
-                </div>
-                <div class="mode-card solution" onclick="window.chat.selectMode('solution')">
-                    <div style="font-size:30px;">🧩</div>
-                    <h4>해결 중심</h4>
-                    <p style="font-size:12px; color:#666;">"이렇게 해보세요" <br> 실질적인 조언이 필요해요.</p>
-                </div>
-            </div>
+            <div id="chat-entry-screen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 20px;">
+				<h3 style="margin-bottom:10px;">어떻게 도와드릴까요?</h3>
+				<button onclick="window.chat.showAiOptions()" style="width: 80%; padding: 20px; border-radius: 16px; border: 2px solid var(--healing); background: white; cursor: pointer;">
+					<div style="font-size:30px;">🤖</div>
+					<div style="font-weight:bold; font-size:16px; margin-top:10px;">AI와 바로 상담하기</div>
+					<div style="font-size:12px; color:#888;">24시간 무료 공감/해결 상담</div>
+				</button>
+				<button onclick="window.booking.open()" style="width: 80%; padding: 20px; border-radius: 16px; border: 2px solid var(--brand); background: white; cursor: pointer;">
+					<div style="font-size:30px;">👩‍⚕️</div>
+					<div style="font-weight:bold; font-size:16px; margin-top:10px;">전문가 예약하기</div>
+					<div style="font-size:12px; color:#888;">상담권 사용하여 심층 상담</div>
+				</button>
+			</div>
+
+			<div id="chat-mode-selector" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 50; flex-direction: column; align-items: center; justify-content: center;">
+				<h3 style="margin-bottom:20px;">원하시는 대화 스타일을 골라주세요</h3>
+				<div class="mode-card empathy" onclick="window.chat.selectMode('empathy')">
+					<div style="font-size:30px;">🧸</div>
+					<h4>공감 중심</h4>
+					<p style="font-size:12px; color:#666;">"많이 힘드셨군요" <br> 따뜻한 위로가 필요해요.</p>
+				</div>
+				<div class="mode-card solution" onclick="window.chat.selectMode('solution')">
+					<div style="font-size:30px;">🧩</div>
+					<h4>해결 중심</h4>
+					<p style="font-size:12px; color:#666;">"이렇게 해보세요" <br> 실질적인 조언이 필요해요.</p>
+				</div>
+				<button onclick="window.chat.backToEntry()" style="margin-top:20px; background:none; border:none; color:#888; text-decoration:underline;">뒤로 가기</button>
+			</div>
             
             <div class="chat-top-bar">
 				<button onclick="window.chat.toggleSidebar()" style="font-size:20px;">≡</button>
@@ -840,17 +1023,31 @@
                 <p style="margin:0; font-size:13px; color:#666;">마케팅본부 · 마케팅 2팀</p>
             </div>
 
-        <div class="ticket-wallet">
-			<div class="wallet-info">
-				<div class="wallet-label">내 상담권 잔액</div>
-				<div class="wallet-value"><span id="mypage-tickets">3</span>회</div>
-				<div class="wallet-subtext">(연 3회 무료 제공)</div>
-			</div>
-			<div class="wallet-actions">
-				<button class="wallet-btn charge" onclick="document.getElementById('payment-modal').style.display='flex'">+ 충전하기</button>
-				<button class="wallet-btn exchange" onclick="document.getElementById('exchange-modal').style.display='flex'; document.getElementById('exchange-modal-points').innerText = window.app.userPoints;">✨ 포인트 교환</button>
-			</div>
-		</div>
+        <div class="ticket-wallet" style="align-items: center;"> <div class="wallet-info">
+                <div class="wallet-label" style="opacity:0.6; font-size:12px; margin-bottom:4px;">내 상담권 잔액</div>
+                
+                <div style="display:flex; gap:15px; align-items: flex-end;">
+                    <div>
+                        <div style="font-size:28px; font-weight:800; line-height:1; margin-bottom:2px;"><span id="mypage-online">3</span>회</div>
+                        <span style="font-size:11px; opacity:0.5;">비대면 (채팅/전화)</span>
+                    </div>
+                    <div style="width:1px; height:30px; background:rgba(255,255,255,0.1); margin:0 5px;"></div>
+                    <div>
+                        <div style="font-size:28px; font-weight:800; line-height:1; margin-bottom:2px; color:;"><span id="mypage-offline">0</span>회</div>
+                        <span style="font-size:11px; opacity:0.5;">대면 (방문)</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px; font-size:11px; font-weight:bold; display:flex; align-items:center; gap:4px; opacity: 0.8;">
+                    ✨ 연 3회 무료 혜택 적용 중
+                </div>
+            </div>
+
+            <div class="wallet-actions">
+                <button class="wallet-btn charge" onclick="document.getElementById('payment-modal').style.display='flex'">+ 충전</button>
+                <button class="wallet-btn exchange" onclick="document.getElementById('exchange-modal').style.display='flex'">✨ 교환</button>
+            </div>
+        </div>
 
             <div class="card">
                 <div class="card-title">서비스 설정</div>
@@ -925,29 +1122,58 @@
     </main>
 
     <div class="modal-bg" id="payment-modal" onclick="this.style.display='none'">
-        <div class="card" style="width:90%; max-width:350px;" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h3 style="margin:0;">상담권 충전</h3>
-                <button onclick="document.getElementById('payment-modal').style.display='none'" style="border:none; background:none; font-size:20px;">×</button>
+        <div class="card" style="width:90%; max-width:360px; padding:25px;" onclick="event.stopPropagation()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">상담권 스토어</h3>
+                <button onclick="document.getElementById('payment-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
             </div>
-            <div style="background:#f8f9fa; padding:15px; border-radius:10px; margin-bottom:15px; text-align:center;">
-                <p style="margin:0 0 5px 0; font-size:13px; color:#666;">현재 보유</p>
-                <div style="font-size:24px; font-weight:bold; color:var(--brand);"><span id="pay-modal-ticket-cnt">3</span>회</div>
+
+            <div class="pay-tab-group">
+                <button class="pay-tab active" onclick="window.payment.switchTab('online')" id="tab-pay-online">비대면 (채팅/전화)</button>
+                <button class="pay-tab" onclick="window.payment.switchTab('offline')" id="tab-pay-offline">대면 (센터 방문)</button>
             </div>
-            
-            <div style="display:grid; gap:10px; margin-bottom:20px;">
-                <button class="pay-option" style="padding:15px; border:1px solid #ddd; background:white; border-radius:8px; text-align:left; cursor:pointer;" onclick="alert('결제 페이지로 이동합니다...');">
-                    <div style="font-weight:bold;">1회권</div>
-                    <div style="font-size:12px; color:#666;">50,000원</div>
-                </button>
-                <button class="pay-option" style="padding:15px; border:2px solid var(--brand); background:#E3F2FD; border-radius:8px; text-align:left; cursor:pointer;" onclick="alert('결제 페이지로 이동합니다...');">
-                    <div style="font-weight:bold; color:var(--brand);">3회권 (BEST)</div>
-                    <div style="font-size:12px; color:#666;">140,000원 (할인)</div>
-                </button>
+
+            <div id="pay-view-online" class="pay-product-list">
+                <div class="pay-product" onclick="window.pg.open('online', 1, 30000, '비대면 상담 1회권')">
+                    <div>
+                        <div style="font-weight:bold; margin-bottom:4px;">💬 비대면 1회권</div>
+                        <div style="font-size:12px; color:#888;">가볍게 시작하는 상담</div>
+                    </div>
+                    <div style="text-align:right;"><div style="font-weight:bold; color:var(--brand);">30,000원</div></div>
+                </div>
+                <div class="pay-product" style="border:1px solid #b2d4ff; background:#f0f7ff;" onclick="window.pg.open('online', 3, 85000, '비대면 상담 3회권')">
+                    <div>
+                        <div style="font-weight:bold; margin-bottom:4px; color:#0056b3;">💬 비대면 3회권 <span class="pay-badge">BEST</span></div>
+                        <div style="font-size:12px; color:#555;">꾸준한 마음 관리</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="text-decoration:line-through; font-size:11px; color:#aaa;">90,000</div>
+                        <div style="font-weight:bold; color:var(--brand);">85,000원</div>
+                    </div>
+                </div>
             </div>
-            <div style="font-size:11px; color:#888; text-align:center;">
-                * 법인 제휴 할인가가 적용되었습니다.<br>
-                * 결제 내역은 회사에 통보되지 않습니다.
+
+            <div id="pay-view-offline" class="pay-product-list" style="display:none;">
+                <div class="pay-product" onclick="window.pg.open('offline', 1, 60000, '대면 상담 1회권')">
+                    <div>
+                        <div style="font-weight:bold; margin-bottom:4px;">☕ 대면 1회권</div>
+                        <div style="font-size:12px; color:#888;">전문가와 직접 만남</div>
+                    </div>
+                    <div style="text-align:right;"><div style="font-weight:bold; color:#333;">60,000원</div></div>
+                </div>
+                <div class="pay-product" style="border:1px solid #ffd8a8; background:#fff9db;" onclick="window.pg.open('offline', 3, 170000, '대면 상담 3회권')">
+                    <div>
+                        <div style="font-weight:bold; margin-bottom:4px; color:#d9480f;">☕ 대면 3회권 <span class="pay-badge" style="background:#fd7e14;">1만원 할인</span></div>
+                        <div style="font-size:12px; color:#666;">심층 심리 치유</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="text-decoration:line-through; font-size:11px; color:#aaa;">180,000</div>
+                        <div style="font-weight:bold; color:#d9480f;">170,000원</div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:20px; font-size:11px; color:#999; text-align:center;">
+                위 상품 선택 시 결제 화면으로 이동합니다.
             </div>
         </div>
     </div>
@@ -968,7 +1194,7 @@
             <button onclick="window.booking.close()" style="border:none; background:none; font-size:18px; cursor:pointer;">✕</button>
         </div>
         <div class="booking-content">
-            <div class="expert-card">
+            <div class="expert-card" id="expert-card-1">
                 <div class="expert-profile">
                     <div class="expert-avatar">K</div>
                     <div class="expert-info">
@@ -980,15 +1206,40 @@
                         </div>
                     </div>
                 </div>
+                
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+                <span class="booking-step-label">STEP 1. 상담 방식 선택</span>
+                <div class="method-grid">
+                    <div class="method-btn selected" onclick="window.booking.selectMethod(this, 'chat')">
+                        <span style="font-size:18px;">💬</span>
+                        <span>채팅</span>
+                        <span class="ticket-required-badge">비대면권</span>
+                    </div>
+                    <div class="method-btn" onclick="window.booking.selectMethod(this, 'call')">
+                        <span style="font-size:18px;">📞</span>
+                        <span>전화</span>
+                        <span class="ticket-required-badge">비대면권</span>
+                    </div>
+                    <div class="method-btn" onclick="window.booking.selectMethod(this, 'meet')">
+                        <span style="font-size:18px;">☕</span>
+                        <span>대면</span>
+                        <span class="ticket-required-badge">대면권</span>
+                    </div>
+                </div>
+
+                <span class="booking-step-label">STEP 2. 가능한 시간 선택</span>
                 <div class="time-slots" id="slots-expert-1">
                     <button class="time-btn" onclick="window.booking.selectTime(this)">오늘 14:00</button>
                     <button class="time-btn" onclick="window.booking.selectTime(this)">오늘 16:00</button>
                     <button class="time-btn" onclick="window.booking.selectTime(this)">내일 10:00</button>
                     <button class="time-btn" onclick="window.booking.selectTime(this)">내일 13:00</button>
                 </div>
-                <button class="book-action-btn" onclick="window.booking.confirm()">이 시간으로 예약하기</button>
+
+                <button class="book-action-btn" onclick="window.booking.confirm(this)">예약 완료 (상담권 차감)</button>
             </div>
-            <div class="expert-card">
+
+            <div class="expert-card" id="expert-card-2">
                 <div class="expert-profile">
                     <div class="expert-avatar" style="background:#E8F5E9; color:#2E7D32;">L</div>
                     <div class="expert-info">
@@ -1000,12 +1251,36 @@
                         </div>
                     </div>
                 </div>
+
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+
+                <span class="booking-step-label">STEP 1. 상담 방식 선택</span>
+                <div class="method-grid">
+                    <div class="method-btn selected" onclick="window.booking.selectMethod(this, 'chat')">
+                        <span style="font-size:18px;">💬</span>
+                        <span>채팅</span>
+                        <span class="ticket-required-badge">비대면권</span>
+                    </div>
+                    <div class="method-btn" onclick="window.booking.selectMethod(this, 'call')">
+                        <span style="font-size:18px;">📞</span>
+                        <span>전화</span>
+                        <span class="ticket-required-badge">비대면권</span>
+                    </div>
+                    <div class="method-btn" onclick="window.booking.selectMethod(this, 'meet')">
+                        <span style="font-size:18px;">☕</span>
+                        <span>대면</span>
+                        <span class="ticket-required-badge">대면권</span>
+                    </div>
+                </div>
+
+                <span class="booking-step-label">STEP 2. 가능한 시간 선택</span>
                 <div class="time-slots" id="slots-expert-2">
                     <button class="time-btn" onclick="window.booking.selectTime(this)">오늘 19:00</button>
                     <button class="time-btn" onclick="window.booking.selectTime(this)">내일 11:00</button>
                     <button class="time-btn" onclick="window.booking.selectTime(this)">내일 15:00</button>
                 </div>
-                <button class="book-action-btn" onclick="window.booking.confirm()">이 시간으로 예약하기</button>
+
+                <button class="book-action-btn" onclick="window.booking.confirm(this)">예약 완료 (상담권 차감)</button>
             </div>
         </div>
     </div>
@@ -1171,6 +1446,72 @@
         <button class="nav-btn" data-tab="stats"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>리포트</span></button>
         <button class="nav-btn" data-tab="mypage"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>내 정보</span></button>
     </nav>
+	<div id="pg-layer">
+    <div class="pg-header">
+        <button onclick="window.pg.close()" style="border:none; background:none; font-size:24px; margin-right:10px; cursor:pointer;">←</button>
+        <div style="font-weight:bold; font-size:16px;">주문/결제</div>
+    </div>
+    
+    <div class="pg-content">
+        <div class="pg-section-title">주문 상품 정보</div>
+        <div class="pg-card">
+            <div class="pg-summary-row">
+                <span>상품명</span>
+                <span style="font-weight:bold; color:#333;" id="pg-prod-name">상품명</span>
+            </div>
+            <div class="pg-summary-row">
+                <span>상품금액</span>
+                <span id="pg-prod-price">0원</span>
+            </div>
+            <div class="pg-summary-row total">
+                <span>최종 결제 금액</span>
+                <span class="price" id="pg-total-price">0원</span>
+            </div>
+        </div>
+
+        <div class="pg-section-title">결제 수단 선택</div>
+        <div class="pg-card">
+            <div class="pg-method-grid">
+                <div class="pg-method-btn selected" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon">💳</span>
+                    <span style="font-size:12px;">신용카드</span>
+                </div>
+                <div class="pg-method-btn" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon" style="color:#FEE500;">🟡</span>
+                    <span style="font-size:12px;">카카오페이</span>
+                </div>
+                <div class="pg-method-btn" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon" style="color:#03C75A;">🟢</span>
+                    <span style="font-size:12px;">네이버페이</span>
+                </div>
+                <div class="pg-method-btn" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon" style="color:#0064FF;">🔵</span>
+                    <span style="font-size:12px;">토스페이</span>
+                </div>
+                <div class="pg-method-btn" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon">📱</span>
+                    <span style="font-size:12px;">휴대폰결제</span>
+                </div>
+                <div class="pg-method-btn" onclick="window.pg.selectMethod(this)">
+                    <span class="pg-icon">🏦</span>
+                    <span style="font-size:12px;">무통장입금</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="pg-section-title">약관 동의</div>
+        <div class="pg-card">
+            <div class="pg-terms" onclick="window.pg.toggleTerms()">
+                <div class="pg-checkbox" id="pg-term-check">✔</div>
+                <span>구매 조건 확인 및 결제 진행 동의 (필수)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pg-footer">
+        <button id="pg-action-btn" class="pg-pay-btn" onclick="window.pg.pay()">결제하기</button>
+    </div>
+	</div>
 </div>
 
 <div class="modal-bg" id="privacy-modal" onclick="this.style.display='none'">
@@ -1209,15 +1550,19 @@
     let genAI = null; 
     let chatSession = null; 
     let isAIReady = false; 
-    let tickets = 3;
+    let onlineTickets = 3; 
+	let offlineTickets = 0; 
     let chatHistory = JSON.parse(localStorage.getItem('mindChatHistory')) || [];
 	
 	const todayStr = new Date().toISOString().split('T')[0];
     // 1. App Controller
-    window.app = {
-		userPoints: parseInt(localStorage.getItem('re_points')) || 0,
-		moodRecorded: localStorage.getItem('lastMoodDate') === todayStr,
-		selectedMood: localStorage.getItem('lastMoodType') || null,
+window.app = {
+        userPoints: parseInt(localStorage.getItem('re_points')) || 0,
+        // [수정] 누적 포인트 추가 (기존 유저는 보유 포인트를 승계)
+        accumulatedPoints: parseInt(localStorage.getItem('re_acc_points')) || parseInt(localStorage.getItem('re_points')) || 0,
+        
+        moodRecorded: localStorage.getItem('lastMoodDate') === todayStr,
+        selectedMood: localStorage.getItem('lastMoodType') || null,
         currentTab: 'home', 
         alertDismissed: false,
         isWatchConnected: true, 
@@ -1229,16 +1574,13 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             const targetTab = document.getElementById(`tab-${tabId}`);
-			targetTab.classList.add('active');
-			targetTab.scrollTop = 0;
+            targetTab.classList.add('active');
+            targetTab.scrollTop = 0;
             document.querySelector(`button[data-tab="${tabId}"]`).classList.add('active');
+            
             if (tabId === 'chat') window.app.dismissAlert();
             
-            // [수정된 부분] 자바스크립트에서는 숫자만 업데이트합니다. (HTML에 '회'가 이미 있음)
-            document.getElementById('ticket-count-home').innerText = tickets;
-            
-            document.getElementById('mypage-tickets').innerText = tickets;
-            document.getElementById('pay-modal-ticket-cnt').innerText = tickets;
+            window.app.updateDisplay();
         },
         
         handleLogoClick: () => {
@@ -1356,144 +1698,152 @@
             document.getElementById('watch-status').classList.remove('alert'); 
             window.app.alertDismissed = true; 
         },
-		
-		getTier: (points) => {
-			if (points >= 25000) return "🌈 Lv.6 마음의 낙원";
-			if (points >= 10000) return "🌲 Lv.5 마음의 숲";
-			if (points >= 8000) return "🌳 Lv.4 마음정원사";
-			if (points >= 5000) return "🌸 Lv.3 마음꽃나무";
-			if (points >= 2500) return "🌿 Lv.2 마음새싹";
-			return "✨ Lv.1 마음꿈나무";
-		},
-		
-		updateDisplay: () => {
-        const points = window.app.userPoints;
-        document.getElementById('user-points').innerText = points;
-        document.getElementById('exchange-modal-points').innerText = points;
         
-        // 칭호 업데이트
-        const tierEl = document.getElementById('user-tier');
-        if (tierEl) tierEl.innerText = window.app.getTier(points);
-
-        document.getElementById('ticket-count-home').innerText = tickets;
-        document.getElementById('mypage-tickets').innerText = tickets;
+        getTier: (points) => {
+            if (points >= 25000) return "🌈 Lv.6 마음의 낙원";
+            if (points >= 10000) return "🌲 Lv.5 마음의 숲";
+            if (points >= 8000) return "🌳 Lv.4 마음정원사";
+            if (points >= 5000) return "🌸 Lv.3 마음꽃나무";
+            if (points >= 2500) return "🌿 Lv.2 마음새싹";
+            return "✨ Lv.1 마음꿈나무";
+        },
         
-        // 브라우저에 포인트 저장
-        localStorage.setItem('re_points', points);
-		},
-		
+        // [핵심 수정] updateDisplay
+        updateDisplay: () => {
+            const points = window.app.userPoints;
+            const accPoints = window.app.accumulatedPoints; // 누적 포인트 가져오기
 
-		// 2. 상담권 교환 함수
-		exchangeTicket: (cost) => {
-			if (window.app.userPoints >= cost) {
-				// [추가] 확인창 단계
-				if (!confirm(`${cost}P를 사용하여 상담권 1회를 교환하시겠습니까?`)) return;
+            // 1. 포인트 표시
+            if(document.getElementById('user-points')) document.getElementById('user-points').innerText = points.toLocaleString();
+            if(document.getElementById('exchange-modal-points')) document.getElementById('exchange-modal-points').innerText = points.toLocaleString();
+            
+            // 2. [수정됨] 칭호 업데이트 (누적 포인트 기준)
+            const currentTier = window.app.getTier(accPoints); 
+            if(document.getElementById('user-tier')) document.getElementById('user-tier').innerText = currentTier;
+            
+            // 3. 상담권 개수 업데이트
+            if(document.getElementById('home-online-cnt')) document.getElementById('home-online-cnt').innerText = onlineTickets;
+            if(document.getElementById('home-offline-cnt')) document.getElementById('home-offline-cnt').innerText = offlineTickets;
+            if(document.getElementById('mypage-online')) document.getElementById('mypage-online').innerText = onlineTickets;
+            if(document.getElementById('mypage-offline')) document.getElementById('mypage-offline').innerText = offlineTickets;
+            
+            // 4. 데이터 저장
+            localStorage.setItem('re_points', points);
+            localStorage.setItem('re_acc_points', accPoints); // 누적 포인트도 저장
+            localStorage.setItem('re_online_tix', onlineTickets);
+            localStorage.setItem('re_offline_tix', offlineTickets);
+        },
 
-				window.app.userPoints -= cost;
-				tickets++; // 전역 tickets 변수 증가
-				window.app.updateDisplay();
-				window.app.showTicketSuccessModal();
-				document.getElementById('exchange-modal').style.display = 'none';
-			} else {
-				alert("포인트가 부족합니다.");
-			}
-		},
+        exchangeTicket: (type, cost) => {
+            if (window.app.userPoints >= cost) {
+                const typeName = type === 'online' ? '비대면' : '대면';
+                if (!confirm(`${cost.toLocaleString()}P를 사용하여 ${typeName} 상담권 1회를 교환하시겠습니까?`)) return;
 
-		debugPoints: () => {
-        const value = prompt("조정할 포인트 값을 입력하세요.\n(예: +1000 또는 -500)", "0");
-        if (value !== null) {
-            const num = parseInt(value);
-            if (!isNaN(num)) {
-                window.app.userPoints += num;
-                if (window.app.userPoints < 0) window.app.userPoints = 0; // 0 미만 방지
+                window.app.userPoints -= cost; // 보유 포인트만 차감 (누적 포인트 유지)
+                if(type === 'online') onlineTickets++;
+                else offlineTickets++;
+                
                 window.app.updateDisplay();
+                window.app.showTicketSuccessModal();
+            } else {
+                alert("포인트가 부족합니다. 마음 기록을 통해 포인트를 더 모아보세요!");
             }
+        },
+
+        debugPoints: () => {
+            const value = prompt("조정할 포인트 값을 입력하세요.\n(예: +1000 또는 -500)", "0");
+            if (value !== null) {
+                const num = parseInt(value);
+                if (!isNaN(num)) {
+                    window.app.userPoints += num;
+                    if (window.app.userPoints < 0) window.app.userPoints = 0; 
+                    
+                    // [수정] 포인트가 늘어날 때만 '누적 포인트'도 같이 증가
+                    if (num > 0) window.app.accumulatedPoints += num;
+
+                    window.app.updateDisplay();
+                }
+            }
+        },
+        
+        exchangeGifticon: (itemName, cost) => {
+            if (window.app.userPoints >= cost) {
+                if (!confirm(`[${itemName}]을(를) ${cost.toLocaleString()}P로 교환하시겠습니까?`)) return;
+
+                window.app.userPoints -= cost; // 보유 포인트만 차감
+                window.app.updateDisplay();
+
+                document.getElementById('exchange-modal').style.display = 'none';
+                
+                const giftNameEl = document.querySelector('#gifticon-modal b');
+                if (giftNameEl) giftNameEl.innerText = itemName;
+                
+                const giftDetailEl = document.getElementById('gift-modal-detail');
+                if (giftDetailEl) giftDetailEl.innerText = itemName + " 1매";
+                
+                const qrImg = document.querySelector('#gifticon-modal img');
+                if (qrImg) {
+                    const uniqueId = Date.now();
+                    const productKey = itemName.replace(/ /g, "_"); 
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RECOVER_${productKey}_${uniqueId}`;
+                }
+
+                document.getElementById('gifticon-modal').style.display = 'flex';
+            } else {
+                alert("포인트가 부족합니다.");
+            }
+        },
+
+        exchangeEarlyLeave: (cost) => {
+            if (window.app.userPoints >= cost) {
+                if (!confirm(`[1시간 조기 퇴근권]을 ${cost.toLocaleString()}P로 교환하시겠습니까?\n(사용 시 취소가 불가능합니다)`)) return;
+
+                window.app.userPoints -= cost; // 보유 포인트만 차감
+                window.app.updateDisplay();
+
+                document.getElementById('exchange-modal').style.display = 'none';
+                document.getElementById('early-leave-modal').style.display = 'flex';
+            } else {
+                alert("포인트가 부족합니다. 조금만 더 마음을 기록해보세요!");
+            }
+        },
+
+        recordMood: (mood, emoji) => {
+            if (!window.app.moodRecorded) {
+                window.app.userPoints += 50;
+                window.app.accumulatedPoints += 50; // [수정] 누적 포인트도 증가
+                
+                window.app.moodRecorded = true;
+                window.app.selectedMood = mood; 
+                
+                localStorage.setItem('lastMoodDate', todayStr);
+                localStorage.setItem('lastMoodType', mood);
+                
+                window.app.updateDisplay();
+                window.app.applyMoodUI(); 
+                
+                document.getElementById('mood-status-msg').style.display = 'block';
+                alert(`${emoji} 기분이 기록되었습니다. 50P가 적립되었어요!`);
+            } else {
+                alert("오늘은 이미 기분을 기록하셨습니다.");
+            }
+        },
+        
+        applyMoodUI: () => {
+            const buttons = document.querySelectorAll('.mood-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(`'${window.app.selectedMood}'`)) {
+                    btn.classList.add('selected'); 
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
+        },
+        
+        showTicketSuccessModal: () => {
+            const modal = document.getElementById('ticket-success-modal');
+            if (modal) modal.style.display = 'flex';
         }
-		},
-		
-		// 3. 스타벅스 교환 함수
-		exchangeGifticon: (itemName, cost) => {
-			if (window.app.userPoints >= cost) {
-				if (!confirm(`[${itemName}]을(를) ${cost.toLocaleString()}P로 교환하시겠습니까?`)) return;
-
-				window.app.userPoints -= cost;
-				window.app.updateDisplay();
-
-				document.getElementById('exchange-modal').style.display = 'none';
-				
-				// 1. 모달 내 텍스트 변경
-				const giftNameEl = document.querySelector('#gifticon-modal b');
-				if (giftNameEl) giftNameEl.innerText = itemName;
-				
-				const giftDetailEl = document.getElementById('gift-modal-detail');
-				if (giftDetailEl) giftDetailEl.innerText = itemName + " 1매";
-				
-				// 2. [핵심] 상품명과 현재 시간을 조합해 고유 QR 코드 생성
-				const qrImg = document.querySelector('#gifticon-modal img');
-				if (qrImg) {
-					const uniqueId = Date.now(); // 중복 방지를 위한 타임스탬프
-					const productKey = itemName.replace(/ /g, "_"); 
-					// 상품마다 데이터 값이 달라지므로 찍히는 모양이 변합니다.
-					qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=RECOVER_${productKey}_${uniqueId}`;
-				}
-
-				document.getElementById('gifticon-modal').style.display = 'flex';
-			} else {
-				alert("포인트가 부족합니다.");
-			}
-		},
-		exchangeEarlyLeave: (cost) => {
-			if (window.app.userPoints >= cost) {
-				if (!confirm(`[1시간 조기 퇴근권]을 ${cost.toLocaleString()}P로 교환하시겠습니까?\n(사용 시 취소가 불가능합니다)`)) return;
-
-				window.app.userPoints -= cost;
-				window.app.updateDisplay();
-
-				document.getElementById('exchange-modal').style.display = 'none';
-				
-				// 조기 퇴근 전용 모달 표시
-				document.getElementById('early-leave-modal').style.display = 'flex';
-			} else {
-				alert("포인트가 부족합니다. 조금만 더 마음을 기록해보세요!");
-			}
-		},
-		// 4. 기분 기록 시 포인트 적립 함수 (이것도 누락되어 있었습니다)
-		recordMood: (mood, emoji) => {
-			if (!window.app.moodRecorded) {
-				window.app.userPoints += 50;
-				window.app.moodRecorded = true;
-				window.app.selectedMood = mood; // 현재 선택 저장
-				
-				// 로컬 스토리지에 오늘 날짜와 선택한 기분 저장
-				localStorage.setItem('lastMoodDate', todayStr);
-				localStorage.setItem('lastMoodType', mood);
-				
-				window.app.updateDisplay();
-				window.app.applyMoodUI(); // 즉시 버튼 색상 적용
-				
-				document.getElementById('mood-status-msg').style.display = 'block';
-				alert(`${emoji} 기분이 기록되었습니다. 50P가 적립되었어요!`);
-			} else {
-				alert("오늘은 이미 기분을 기록하셨습니다.");
-			}
-		},
-		
-		applyMoodUI: () => {
-			const buttons = document.querySelectorAll('.mood-btn');
-			buttons.forEach(btn => {
-				// 버튼의 onclick 텍스트나 인자를 확인해 어떤 기분인지 판별
-				if (btn.getAttribute('onclick').includes(`'${window.app.selectedMood}'`)) {
-					btn.classList.add('selected'); // 선택된 버튼에 파란 테두리 적용
-				} else {
-					btn.classList.remove('selected');
-				}
-			});
-		},
-		
-		showTicketSuccessModal: () => {
-        const modal = document.getElementById('ticket-success-modal');
-        if (modal) modal.style.display = 'flex';
-		}
     };
 
     // 2. Chat Manager
@@ -1502,11 +1852,26 @@
         selectedMode: null,
         currentMessages: [],
         
+		showAiOptions: () => {
+        document.getElementById('chat-entry-screen').style.display = 'none';
+        document.getElementById('chat-mode-selector').style.display = 'flex';
+		},
+		
         selectMode: (mode) => {
             window.chat.selectedMode = mode;
-            document.getElementById('chat-mode-selector').style.display = 'none';
-            window.chat.initAI(mode);
+			document.getElementById('chat-mode-selector').style.display = 'none';
+			
+			// 채팅바와 입력창 표시
+			document.querySelector('.chat-top-bar').style.display = 'flex';
+			document.querySelector('.chat-input-box').style.display = 'flex';
+			
+			window.chat.initAI(mode);
         },
+		
+		backToEntry: () => {
+        document.getElementById('chat-entry-screen').style.display = 'flex';
+        document.getElementById('chat-mode-selector').style.display = 'none';
+		},
         
         initAI: async (mode) => {
             // [1] Base Persona & Safety Protocols (공통)
@@ -1601,36 +1966,30 @@
         },
 
         goChat: (targetMode) => {
-		const headerLabel = document.getElementById('chat-header-label');
+        const headerLabel = document.getElementById('chat-header-label');
 
 			if (targetMode === 'human') {
-				if(tickets > 0) {
-					tickets--;
-					window.app.switchTab('chat'); 
-					alert(`상담권이 차감되었습니다. (잔여: ${tickets}회)`);
-            
-					window.chat.mode = 'human'; 
+				// [중요] 전문가 상담일 때만 상담권 체크 및 차감
+				if (onlineTickets > 0) {
+					onlineTickets--;
+					window.app.updateDisplay();
+					window.chat.mode = 'human';
+					document.getElementById('chat-entry-screen').style.display = 'none';
 					document.getElementById('chat-mode-selector').style.display = 'none';
-
+					document.querySelector('.chat-top-bar').style.display = 'flex';
+					document.querySelector('.chat-input-box').style.display = 'flex';
 					headerLabel.innerHTML = '<b>전문가 상담 (1:1)</b> · 익명 보장';
-					headerLabel.style.background = '#E3FAFC'; 
-					headerLabel.style.color = '#0C8599';      
-
-					window.chat.addMsg('system', '🔒 전문가와 연결되었습니다. (익명 보장)');
+					window.chat.addMsg('system', '🔒 전문가와 연결되었습니다.');
 				} else {
-					if(confirm("잔여 상담권이 없습니다. 상담권을 충전하시겠습니까?")) {
-						document.getElementById('payment-modal').style.display='flex';
-					}
-					return;
+					alert("상담권이 부족합니다. 포인트로 교환해 주세요.");
+					window.app.switchTab('mypage');
 				}
 			} else {
+				// [중요] AI 상담은 차감 없이 무료로 시작
 				window.chat.mode = 'ai';
-        
+				document.getElementById('chat-entry-screen').style.display = 'none';
 				headerLabel.innerHTML = '<b>AI 상담 (24h)</b> · 익명 보장';
-				headerLabel.style.background = '#E8F5E9'; 
-				headerLabel.style.color = '#2E7D32';      
-
-				window.app.switchTab('chat');
+				// welcome 메시지는 initAI에서 자동 호출됨
 			}
 		},
 
@@ -1753,36 +2112,115 @@
             }
         },
 		resetMode: () => {
-            if(confirm("대화 모드를 다시 선택하시겠습니까?")) {
-                document.getElementById('chat-mode-selector').style.display = 'flex';
-                
-                const headerLabel = document.getElementById('chat-header-label');
-                headerLabel.innerHTML = '🤖 <b>AI 상담 (24h)</b> · 익명 보장';
-                headerLabel.style.background = '#E8F5E9';
-                headerLabel.style.color = '#2E7D32';
+			if(confirm("대화 모드를 다시 선택하시겠습니까?")) {
+				document.getElementById('chat-mode-selector').style.display = 'flex';
+				
+				// 채팅바와 입력창 다시 숨김
+				document.querySelector('.chat-top-bar').style.display = 'none';
+				document.querySelector('.chat-input-box').style.display = 'none';
 
-                window.chat.mode = 'ai';
-                window.chat.selectedMode = null;
-                
-                window.chat.addMsg('system', '🔄 상담 유형 선택 화면으로 돌아갑니다.');
-            }
-        }
+				window.chat.mode = 'ai';
+				window.chat.selectedMode = null;
+				document.getElementById('msg-container').innerHTML = ''; // 기존 대화 비우기(선택사항)
+			}
+		},
+
+		backToEntry: () => {
+			document.getElementById('chat-entry-screen').style.display = 'flex';
+			document.getElementById('chat-mode-selector').style.display = 'none';
+			
+			// 혹시 모르니 다시 한번 숨김 확인
+			document.querySelector('.chat-top-bar').style.display = 'none';
+			document.querySelector('.chat-input-box').style.display = 'none';
+		},
     };
 
     // 3. Booking Manager
     window.booking = {
-        open: () => { document.getElementById('booking-view').classList.add('active'); },
+        open: () => { 
+            const view = document.getElementById('booking-view');
+            view.classList.add('active');
+            
+            // [추가된 부분] 창을 열 때 스크롤을 맨 위로 강제 이동
+            const content = view.querySelector('.booking-content');
+            if (content) content.scrollTop = 0;
+            
+            // 기존 초기화 로직 (선택 해제)
+            view.querySelectorAll('.method-btn').forEach(btn => btn.classList.remove('selected'));
+            view.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('selected'));
+        },
+
         close: () => { document.getElementById('booking-view').classList.remove('active'); },
+        
+        // 상담 방식 선택
+        selectMethod: (btn, type) => {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
+            
+            btn.classList.add('selected');
+            btn.dataset.type = type; 
+        },
+
+        // 시간 선택
         selectTime: (btn) => {
             const parent = btn.parentElement;
             parent.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
         },
-        confirm: () => {
-            const selected = document.querySelector('.time-btn.selected');
-            if(!selected) { alert('예약하실 시간을 선택해주세요.'); return; }
-            if(confirm(`${selected.innerText}로 예약하시겠습니까?`)) {
-                alert('예약이 확정되었습니다.\n(알림톡이 발송됩니다)');
+
+        // 예약 확정 및 차감 로직 (기존과 동일)
+        confirm: (btn) => {
+            const card = btn.closest('.expert-card');
+            
+            const selectedTimeBtn = card.querySelector('.time-btn.selected');
+            if(!selectedTimeBtn) { alert('예약하실 시간을 선택해주세요.'); return; }
+            
+            const selectedMethodBtn = card.querySelector('.method-btn.selected');
+            if(!selectedMethodBtn) { alert('상담 방식을 선택해주세요 (채팅/전화/대면).'); return; }
+
+            const methodType = selectedMethodBtn.dataset.type; 
+            
+            let methodText = "";
+            let ticketType = ""; 
+            
+            if (methodType === 'meet') {
+                methodText = "☕ 대면 상담";
+                ticketType = "offline";
+            } else if (methodType === 'call') {
+                methodText = "📞 전화 상담";
+                ticketType = "online";
+            } else {
+                methodText = "💬 채팅 상담";
+                ticketType = "online";
+            }
+
+            if (ticketType === 'online') {
+                if (onlineTickets > 0) {
+                    if(confirm(`[${methodText}]을(를) 예약하시겠습니까?\n보유하신 '비대면 상담권' 1회가 차감됩니다.`)) {
+                        onlineTickets--; 
+                        finalizeBooking(methodText, selectedTimeBtn.innerText);
+                    }
+                } else {
+                    alert("보유하신 '비대면 상담권'이 부족합니다.\n포인트 교환소에서 충전해주세요.");
+                    window.app.switchTab('mypage');
+                    window.booking.close();
+                }
+            } else if (ticketType === 'offline') {
+                if (offlineTickets > 0) {
+                    if(confirm(`[${methodText}]을(를) 예약하시겠습니까?\n보유하신 '대면 상담권' 1회가 차감됩니다.`)) {
+                        offlineTickets--; 
+                        finalizeBooking(methodText, selectedTimeBtn.innerText);
+                    }
+                } else {
+                    alert("보유하신 '대면 상담권'이 부족합니다.\n포인트 교환소에서 충전해주세요.");
+                    window.app.switchTab('mypage');
+                    window.booking.close();
+                }
+            }
+            
+            function finalizeBooking(method, time) {
+                window.app.updateDisplay(); 
+                alert(`✅ 예약이 확정되었습니다.\n\n- 일시: ${time}\n- 방식: ${method}\n\n(상담 시작 10분 전에 알림을 보내드립니다)`);
                 window.booking.close();
             }
         }
@@ -2041,20 +2479,170 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
+        // 탭 전환 버튼들 연결
         document.querySelectorAll('.nav-btn').forEach(btn => btn.onclick = () => window.app.switchTab(btn.dataset.tab));
+        
+        // 채팅 전송 관련
         document.getElementById('send-btn').onclick = () => window.chat.send();
         document.getElementById('input-msg').onkeypress = (e) => { if (e.key === 'Enter') window.chat.send(); };
+        
+        // 기타 UI 버튼 연결
         document.getElementById('privacy-btn').onclick = window.app.showPrivacy;
         document.getElementById('dismiss-alert-btn').onclick = window.app.dismissAlert;
-        document.getElementById('connect-human-btn').onclick = () => window.chat.goChat('human');
+
+        // [수정된 부분] AI 바로 상담 버튼 (순서 변경: 화면 세팅 -> 탭 이동)
+        document.getElementById('connect-human-btn').onclick = () => {
+            // 1. '성격 선택' 화면을 먼저 강제로 띄움 (보이지 않는 상태에서 준비)
+            window.chat.showAiOptions(); 
+            
+            // 2. 그 다음 '상담' 탭을 활성화 (준비된 화면이 바로 보임)
+            window.app.switchTab('chat');
+        };
+
         document.getElementById('sos-btn').onclick = () => window.chat.goChat('human');
         document.getElementById('btn-book-expert').onclick = window.booking.open;
+        
+        // 저장된 기분 표시
         if (window.app.moodRecorded) {
-        document.getElementById('mood-status-msg').style.display = 'block';
-        window.app.applyMoodUI(); // 저장된 기분 버튼을 눌러진 상태로 표시
-		}
+            document.getElementById('mood-status-msg').style.display = 'block';
+            window.app.applyMoodUI(); 
+        }
+		
+		window.app.updateDisplay();
+        
+        // 센서 시작
         sensor.init();
     });
+	
+	// 5. Payment System (신규 추가)
+    window.payment = {
+        // 탭 전환 기능
+        switchTab: (type) => {
+            const onlineBtn = document.getElementById('tab-pay-online');
+            const offlineBtn = document.getElementById('tab-pay-offline');
+            const onlineView = document.getElementById('pay-view-online');
+            const offlineView = document.getElementById('pay-view-offline');
+
+            if (type === 'online') {
+                onlineBtn.classList.add('active');
+                offlineBtn.classList.remove('active');
+                onlineView.style.display = 'flex';
+                offlineView.style.display = 'none';
+            } else {
+                onlineBtn.classList.remove('active');
+                offlineBtn.classList.add('active');
+                onlineView.style.display = 'none';
+                offlineView.style.display = 'flex';
+            }
+        },
+
+        // 결제 처리 로직
+        process: (type, count, amount) => {
+            const typeName = type === 'online' ? '비대면 상담권' : '대면 상담권';
+            
+            // 1. 확인 팝업
+            if (!confirm(`[${typeName} ${count}회권]\n\n결제 금액: ${amount.toLocaleString()}원\n\n결제를 진행하시겠습니까?`)) return;
+
+            // 2. 결제 대기 시뮬레이션 (PG사 연결 느낌)
+            alert("💳 안전한 결제를 위해 PG사로 연결 중입니다...\n(잠시만 기다려주세요)");
+
+            // 3. 결제 성공 처리 (약간의 딜레이 후 적용)
+            setTimeout(() => {
+                if (type === 'online') {
+                    onlineTickets += count;
+                } else {
+                    offlineTickets += count;
+                }
+                
+                window.app.updateDisplay(); // 화면 상단 개수 갱신
+                document.getElementById('payment-modal').style.display = 'none'; // 모달 닫기
+                
+                // 4. 완료 알림
+                alert(`✅ 결제가 정상적으로 완료되었습니다.\n\n[${typeName} ${count}회]가 즉시 충전되었습니다.`);
+            }, 1000);
+        }
+    };
+	
+	// [신규] PG 결제 시스템
+    window.pg = {
+        currentData: null,
+        isAgreed: false,
+
+        // 결제창 열기
+        open: (type, count, price, name) => {
+            window.pg.currentData = { type, count, price, name };
+            window.pg.isAgreed = false;
+            
+            // 화면 데이터 세팅
+            document.getElementById('pg-prod-name').innerText = name;
+            document.getElementById('pg-prod-price').innerText = price.toLocaleString() + "원";
+            document.getElementById('pg-total-price').innerText = price.toLocaleString() + "원";
+            document.getElementById('pg-action-btn').innerText = `${price.toLocaleString()}원 결제하기`;
+            
+            // 약관 초기화
+            document.getElementById('pg-term-check').classList.remove('checked');
+            document.getElementById('pg-action-btn').disabled = true;
+
+            // PG창 슬라이드 업
+            document.getElementById('pg-layer').style.display = 'flex';
+        },
+
+        close: () => {
+            document.getElementById('pg-layer').style.display = 'none';
+        },
+
+        selectMethod: (el) => {
+            document.querySelectorAll('.pg-method-btn').forEach(btn => btn.classList.remove('selected'));
+            el.classList.add('selected');
+        },
+
+        toggleTerms: () => {
+            window.pg.isAgreed = !window.pg.isAgreed;
+            const check = document.getElementById('pg-term-check');
+            const btn = document.getElementById('pg-action-btn');
+            
+            if(window.pg.isAgreed) {
+                check.classList.add('checked');
+                btn.disabled = false;
+            } else {
+                check.classList.remove('checked');
+                btn.disabled = true;
+            }
+        },
+
+        pay: () => {
+            if(!window.pg.isAgreed) return;
+            const data = window.pg.currentData;
+
+            // 로딩 시뮬레이션
+            const btn = document.getElementById('pg-action-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "결제 처리 중...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // 결제 성공 처리
+                if (data.type === 'online') {
+                    onlineTickets += data.count;
+                } else {
+                    offlineTickets += data.count;
+                }
+                
+                window.app.updateDisplay();
+                
+                alert(`✅ 결제가 완료되었습니다.\n\n[${data.name}]이(가) 정상적으로 충전되었습니다.`);
+                
+                window.pg.close();
+                document.getElementById('payment-modal').style.display = 'none'; // 스토어도 닫기
+                
+                // 버튼 복구
+                btn.innerText = originalText;
+                btn.disabled = false;
+
+            }, 1500); // 1.5초 딜레이
+        }
+    };
+	
 </script>
 <div class="modal-bg" id="exchange-modal" onclick="this.style.display='none'">
     <div class="card" style="width:90%; max-width:350px;" onclick="event.stopPropagation()">
@@ -2070,13 +2658,23 @@
 
         <div style="display:grid; gap:12px; margin-bottom:20px;">
             
-            <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-weight:bold; color:var(--brand);">전문가 상담권 1회</div>
-                    <div style="font-size:12px; color:#666;">6,000 P 소요</div>
-                </div>
-                <button onclick="window.app.exchangeTicket(6000)" style="background:var(--brand); color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
-            </div>
+            <div style="display:grid; gap:12px; margin-bottom:20px;">
+				<div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+					<div>
+						<div style="font-weight:bold; color:var(--brand);">비대면 상담권 (채팅/화상)</div>
+						<div style="font-size:12px; color:#666;">5,000 P 소요</div>
+					</div>
+					<button onclick="window.app.exchangeTicket('online', 3000)" style="background:var(--brand); color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+				</div>
+
+				<div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
+					<div>
+						<div style="font-weight:bold; color:#6c5ce7;">대면 상담권 (센터 방문)</div>
+						<div style="font-size:12px; color:#666;">6,000 P 소요</div>
+					</div>
+					<button onclick="window.app.exchangeTicket('offline', 6000)" style="background:#6c5ce7; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">교환</button>
+				</div>
+			</div>
 
             <div style="padding:15px; border:1px solid #eee; background:white; border-radius:12px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -2178,5 +2776,8 @@
         </div>
     </div>
 </div>
+
+
+
 </body>
 </html>
