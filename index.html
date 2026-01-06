@@ -490,8 +490,60 @@
         }
         
         .admin-header { background: var(--admin); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .admin-kpi { display: flex; gap: 10px; padding: 20px; overflow-x: auto; }
-        .kpi-card { min-width: 120px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .admin-kpi {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 12px;
+			padding: 20px;
+		}
+		.kpi-card {
+			min-width: 0 !important; /* 그리드 대응 */
+			border-top: 4px solid var(--admin);
+		}
+		.kpi-value.danger { color: var(--danger); }
+		.kpi-value.safe { color: var(--healing); }
+
+		.risk-radar-card {
+			background: #FFF5F5;
+			border: 1px solid #FFE3E3;
+		}
+		.risk-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 10px 0;
+			border-bottom: 1px solid #FFE3E3;
+		}
+		.risk-item:last-child { border-bottom: none; }
+		.risk-tag {
+			font-size: 10px;
+			padding: 2px 6px;
+			border-radius: 4px;
+			font-weight: bold;
+		}
+		.tag-critical { background: var(--danger); color: white; }
+		.tag-warning { background: #FF9F43; color: white; }
+
+		.admin-action-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+			margin-top: 10px;
+		}
+		.btn-admin-task {
+			background: white;
+			border: 1px solid #ddd;
+			padding: 12px;
+			border-radius: 10px;
+			font-size: 12px;
+			font-weight: bold;
+			cursor: pointer;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 5px;
+		}
+		.btn-admin-task:hover { background: #f8f9fa; border-color: var(--admin); }
         .action-item { background: #FFF3CD; border-left: 4px solid #FFC107; padding: 15px; margin-bottom: 10px; border-radius: 4px; font-size: 13px; line-height: 1.4; }
         
         #breathing-guide { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 300; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
@@ -976,57 +1028,137 @@
     </div>
 
     <div id="admin-view">
-        <div class="admin-header">
-            <div style="font-weight:bold;">🏢 Enterprise Admin</div>
-            <button onclick="window.app.toggleAdmin(false)" style="background:none; border:1px solid rgba(255,255,255,0.3); color:white; padding:5px 10px; border-radius:4px; font-size:12px; cursor:pointer;">나가기</button>
-        </div>
-        <div style="flex:1; overflow-y:auto; padding:20px;">
-            <div style="font-size:18px; font-weight:bold; margin-bottom:15px; color:#2C3E50;">마케팅팀 현황 대시보드</div>
-            <div class="admin-kpi">
-                <div class="kpi-card">
-                    <div class="kpi-label">평균 스트레스</div>
-                    <div class="kpi-value" style="color:#FF6B6B;">82.5 <span style="font-size:12px;">▲</span></div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">위기 감지(Alert)</div>
-                    <div class="kpi-value">12건</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">AI 상담 건수</div>
-                    <div class="kpi-value" style="color:#00D2BA;">453건</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">팀별 스트레스 비교</div>
-                <div class="chart-wrap"><canvas id="adminChart"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-title" style="color:#D35400;">⚠️ AI 분석 권고 사항</div>
-                <div class="action-item">
-                    <b>[마케팅 2팀] 긴급 번아웃 경보</b><br>
-                    최근 3일간 야근 및 고심박수 빈도가 40% 증가했습니다. 
-                    <u>'금요일 조기 퇴근'</u>을 권장합니다.
-                </div>
-                <div class="action-item" style="background:#E8F8F5; border-left-color:#00D2BA;">
-                    <b>[개발팀] 수면 부족 지속</b><br>
-                    평균 수면 시간이 5시간 미만입니다.
-                    <u>'수면 위생 교육'</u> 콘텐츠 배포를 제안합니다.
-                </div>
-            </div>
-        </div>
-    </div>
+		<div class="admin-header">
+			<div style="display:flex; align-items:center; gap:10px;">
+				<span style="font-size:20px;">🏢</span>
+				<div style="font-weight:bold;">Enterprise Admin <span style="font-weight:normal; font-size:12px; opacity:0.7;">| HR Mode</span></div>
+			</div>
+			<button onclick="window.app.toggleAdmin(false)" style="background:none; border:1px solid rgba(255,255,255,0.3); color:white; padding:5px 12px; border-radius:20px; font-size:12px; cursor:pointer;">Dashboard Exit</button>
+		</div>
+		
+		<div style="flex:1; overflow-y:auto; padding:20px;">
+			<div style="font-size:16px; font-weight:bold; margin-bottom:15px; color:#2C3E50;">현황 대시보드</div>
+			<div class="admin-kpi" style="padding:0; margin-bottom:20px;">
+				<div class="kpi-card">
+					<div style="font-size:11px; color:#888;">평균 스트레스 지수</div>
+					<div class="kpi-value danger">78.2 <span style="font-size:12px;">▲ 4.1</span></div>
+				</div>
+				<div class="kpi-card">
+					<div style="font-size:11px; color:#888;">번아웃 위험군</div>
+					<div class="kpi-value">14% <span style="font-size:12px; font-weight:normal; color:#888;">(28명)</span></div>
+				</div>
+				<div class="kpi-card">
+					<div style="font-size:11px; color:#888;">AI 상담 활성도</div>
+					<div class="kpi-value safe">92% <span style="font-size:12px;">▲ 12%</span></div>
+				</div>
+				<div class="kpi-card">
+					<div style="font-size:11px; color:#888;">익명 보장 신뢰도</div>
+					<div class="kpi-value">98.5점</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-title">
+					<span>팀별 스트레스 비교 (평균/최고)</span>
+					<span style="font-size:11px; color:#888; font-weight:normal;">단위: Index</span>
+				</div>
+				<div class="chart-wrap" style="height:250px;"><canvas id="adminTeamChart"></canvas></div>
+			</div>
+
+			<div class="card risk-radar-card">
+				<div class="card-title" style="color:var(--danger);">🚨 실시간 리스크 레이더</div>
+				<div class="risk-item">
+					<div>
+						<span class="risk-tag tag-critical">CRITICAL</span>
+						<span style="font-weight:bold; margin-left:5px;">마케팅 2팀</span>
+					</div>
+					<div style="font-size:12px; color:#666;">심박 변이도 급증 (3명)</div>
+				</div>
+				<div class="risk-item">
+					<div>
+						<span class="risk-tag tag-warning">WARNING</span>
+						<span style="font-weight:bold; margin-left:5px;">개발본부 B팀</span>
+					</div>
+					<div style="font-size:12px; color:#666;">평균 야근 시간 4h 초과</div>
+				</div>
+			</div>
+
+			<div style="font-size:16px; font-weight:bold; margin-bottom:15px; color:#2C3E50;">AI 분석 기반 추천 액션</div>
+			<div class="action-item" style="margin-bottom:15px;">
+				<b>[인사이트]</b> 마케팅 2팀의 스트레스 수치가 월요일 오전 10시에 집중됩니다. 주간 회의 방식을 서면으로 대체할 것을 제안합니다.
+			</div>
+			
+			<div class="admin-action-grid">
+				<button class="btn-admin-task" onclick="alert('전사 1시간 조기퇴근권이 발송되었습니다.')">
+					<span style="font-size:20px;">🚀</span>
+					<span>전사 조기퇴근</span>
+				</button>
+				<button class="btn-admin-task" onclick="alert('해당 팀에 커피차/간식 배송 예약이 완료되었습니다.')">
+					<span style="font-size:20px;">🚚</span>
+					<span>팀 기프트 발송</span>
+				</button>
+				<button class="btn-admin-task" onclick="alert('전문가 방문 상담 세션이 예약되었습니다.')">
+					<span style="font-size:20px;">👩‍⚕️</span>
+					<span>찾아가는 상담</span>
+				</button>
+				<button class="btn-admin-task" onclick="alert('익명 피드백 수집 설문이 시작되었습니다.')">
+					<span style="font-size:20px;">📝</span>
+					<span>심층 설문 시작</span>
+				</button>
+			</div>
+		</div>
+		<div class="modal-bg" id="team-detail-modal" onclick="this.style.display='none'">
+			<div class="card" style="width:95%; max-width:400px; height:85vh; overflow-y:auto; margin-top:20px;" onclick="event.stopPropagation()">
+				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+					<div>
+						<h3 id="detail-team-name" style="margin:0;">마케팅 2팀 상세 리포트</h3>
+						<div style="font-size:12px; color:#888; margin-top:4px;">분석 기간: 최근 30일 (2025.12.07 ~ 2026.01.06)</div>
+					</div>
+					<button onclick="document.getElementById('team-detail-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
+				</div>
+
+				<div class="card" style="padding:15px; border:1px solid #f0f0f0; box-shadow:none;">
+					<div style="font-size:14px; font-weight:bold; margin-bottom:10px;">📉 월간 스트레스 변화</div>
+					<div class="chart-wrap" style="height:150px;"><canvas id="teamTrendChart"></canvas></div>
+				</div>
+
+				<div class="status-grid" style="margin-bottom:20px;">
+					<div class="status-item">
+						<div style="font-size:11px; color:#888;">전월 대비 변화</div>
+						<span class="status-val" style="color:#FF6B6B;">+12.4%</span>
+						<div style="font-size:10px; color:#888;">상승 추세 ⚠️</div>
+					</div>
+					<div class="status-item">
+						<div style="font-size:11px; color:#888;">팀 내 상담 건수</div>
+						<span id="detail-consult-count" class="status-val" style="color:var(--brand);">84건</span>
+						<div style="font-size:10px; color:#888;">전사 비중 18.5%</div>
+					</div>
+				</div>
+
+				<div class="card" style="padding:15px; border:1px solid #f0f0f0; box-shadow:none;">
+					<div style="font-size:14px; font-weight:bold; margin-bottom:10px;">💬 상담 주요 키워드 Top 5</div>
+					<div class="chart-wrap" style="height:180px;"><canvas id="teamKeywordChart"></canvas></div>
+				</div>
+
+				<div style="margin-top:10px;">
+					<textarea placeholder="해당 팀에 대한 관리자 코멘트를 남겨주세요." style="width:100%; height:80px; padding:10px; border-radius:10px; border:1px solid #ddd; font-size:13px; outline:none;"></textarea>
+					<button class="p-btn" style="margin-top:10px; padding:12px;">리포트 PDF 저장</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
     <div class="alert-overlay" id="panic-alert">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
             <div style="font-size:24px;">🚨</div>
             <div>
                 <div style="font-weight:bold; font-size:16px; color:var(--danger);">공황 징후 감지됨</div>
-                <div style="font-size:12px; color:#666;">심박수가 급격히 상승했습니다.</div>
+                <div style="font-size:12px; color:#666;">심박수가 급격히 상승했어요.</div>
             </div>
         </div>
         <div style="display:flex; gap:10px;">
             <button onclick="window.app.startBreathing()" style="flex:1; padding:10px; background:var(--healing); color:white; border:none; border-radius:8px; font-weight:bold;">🍃 호흡법 시작</button>
-            <button id="sos-btn" style="flex:1; padding:10px; background:var(--danger); color:white; border:none; border-radius:8px; font-weight:bold;">SOS 전문가</button>
+            <button id="sos-btn" style="flex:1; padding:10px; background:var(--danger); color:white; border:none; border-radius:8px; font-weight:bold;">SOS 전문가 연결</button>
         </div>
         <div style="text-align:center; margin-top:10px;">
             <button id="dismiss-alert-btn" style="background:none; border:none; color:#999; text-decoration:underline; font-size:12px;">괜찮아요, 닫기</button>
@@ -1226,10 +1358,11 @@
         },
 		
 		getTier: (points) => {
-			if (points >= 6000) return "🌲 Lv.5 마음의 숲";
-			if (points >= 4000) return "🌳 Lv.4 마음정원사";
-			if (points >= 2000) return "🌸 Lv.3 마음꽃나무";
-			if (points >= 1000) return "🌿 Lv.2 마음새싹";
+			if (points >= 25000) return "🌈 Lv.6 마음의 낙원";
+			if (points >= 10000) return "🌲 Lv.5 마음의 숲";
+			if (points >= 8000) return "🌳 Lv.4 마음정원사";
+			if (points >= 5000) return "🌸 Lv.3 마음꽃나무";
+			if (points >= 2500) return "🌿 Lv.2 마음새싹";
 			return "✨ Lv.1 마음꿈나무";
 		},
 		
@@ -1657,24 +1790,168 @@
 
     // 4. Admin & Sensor & Init
     window.admin = {
-        chart: null,
-        initChart: () => {
-            if(window.admin.chart) return;
-            const ctx = document.getElementById('adminChart').getContext('2d');
-            window.admin.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['마케팅', '개발', '영업', '인사', '디자인'],
-                    datasets: [{
-                        label: '평균 스트레스',
-                        data: [82, 55, 78, 40, 65],
-                        backgroundColor: ['#FF6B6B', '#00D2BA', '#FF9F43', '#54A0FF', '#5f27cd']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-    };
+		chart: null,
+		trendChart: null,
+		keywordChart: null,
+
+		// [핵심] 팀별 맞춤 데이터 설정 (메인 차트 수치와 일치시킴)
+		teamConfigs: {
+			'마케팅 1팀': { stress: 65, trend: [58, 62, 60, 65], keywords: [35, 25, 20, 10, 10], consults: 45 },
+			'마케팅 2팀': { stress: 88, trend: [72, 80, 85, 88], keywords: [30, 15, 45, 5, 5], consults: 124 },
+			'개발 A팀': { stress: 52, trend: [55, 50, 48, 52], keywords: [20, 10, 15, 25, 30], consults: 38 },
+			'개발 B팀': { stress: 74, trend: [65, 70, 72, 74], keywords: [40, 20, 25, 10, 5], consults: 92 },
+			'인사팀': { stress: 42, trend: [45, 40, 42, 42], keywords: [15, 35, 10, 20, 20], consults: 21 },
+			'영업팀': { stress: 70, trend: [60, 65, 75, 70], keywords: [50, 20, 10, 10, 10], consults: 133 }
+		},
+
+		initChart: () => {
+			if(window.admin.chart) return;
+			const ctx = document.getElementById('adminTeamChart').getContext('2d');
+			
+			// teamConfigs에서 라벨과 데이터를 동적으로 가져옴
+			const labels = Object.keys(window.admin.teamConfigs);
+			const stressData = labels.map(name => window.admin.teamConfigs[name].stress);
+
+			window.admin.chart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: '평균 스트레스',
+							data: stressData,
+							backgroundColor: (context) => {
+								const val = context.raw;
+								return val > 80 ? 'rgba(255, 107, 107, 0.7)' : 
+									   val > 60 ? 'rgba(255, 159, 67, 0.7)'  : 
+									   'rgba(0, 210, 186, 0.7)';
+							},
+							borderRadius: 5,
+						},
+						{
+							label: '권장 기준선',
+							data: Array(labels.length).fill(60),
+							type: 'line',
+							borderColor: '#2D3436',
+							borderWidth: 2,
+							borderDash: [5, 5], 
+							pointRadius: 0,
+							fill: false,
+						}
+					]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					onClick: (e, activeEls) => {
+						if (activeEls.length > 0) {
+							const index = activeEls[0].index;
+							const teamName = window.admin.chart.data.labels[index];
+							window.admin.showTeamDetail(teamName);
+						}
+					},
+					plugins: {
+						legend: { position: 'bottom' },
+						tooltip: {
+							callbacks: {
+								footer: (items) => {
+									const val = items[0].raw;
+									if(val > 80) return "⚠️ 즉시 면담 및 조치가 필요합니다.";
+									if(val > 60) return "💡 주의 단계입니다. 모니터링하세요.";
+									return "✅ 안정적인 상태입니다.";
+								}
+							}
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							max: 100,
+							grid: {
+								color: (context) => {
+									if (context.tick.value === 60) return 'rgba(45, 52, 54, 0.5)';
+									return 'rgba(0, 0, 0, 0.05)';
+								}
+							}
+						}
+					}
+				}
+			});
+		},
+
+		showTeamDetail: (teamName) => {
+			const config = window.admin.teamConfigs[teamName];
+			if(!config) return;
+
+			document.getElementById('team-detail-modal').style.display = 'flex';
+			document.getElementById('detail-team-name').innerText = `${teamName} 상세 리포트`;
+			document.getElementById('detail-consult-count').innerText = `${config.consults}건`;
+
+			// 클릭한 팀의 전용 데이터를 차트 함수에 전달
+			window.admin.initTrendChart(config.trend);
+			window.admin.initKeywordChart(config.keywords);
+		},
+
+		initTrendChart: (trendData) => {
+			const ctx = document.getElementById('teamTrendChart').getContext('2d');
+			if (window.admin.trendChart) window.admin.trendChart.destroy();
+			
+			window.admin.trendChart = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: ['1주차', '2주차', '3주차', '4주차'],
+					datasets: [
+						{
+							label: '스트레스 추이',
+							data: trendData,
+							borderColor: '#FF6B6B',
+							tension: 0.4,
+							fill: false
+						},
+						{
+							label: '안전 지대',
+							data: [60, 60, 60, 60],
+							borderColor: 'rgba(0, 210, 186, 0.4)',
+							borderWidth: 1,
+							borderDash: [2, 2],
+							pointRadius: 0,
+							backgroundColor: 'rgba(0, 210, 186, 0.05)',
+							fill: 'origin' 
+						}
+					]
+				},
+				options: {
+					responsive: true, 
+					maintainAspectRatio: false,
+					plugins: { legend: { display: false } },
+					scales: { y: { min: 0, max: 100 } }
+				}
+			});
+		},
+
+		initKeywordChart: (keywordData) => {
+			const ctx = document.getElementById('teamKeywordChart').getContext('2d');
+			if (window.admin.keywordChart) window.admin.keywordChart.destroy();
+
+			window.admin.keywordChart = new Chart(ctx, {
+				type: 'bar',
+				data: {
+					labels: ['업무량', '관계 갈등', '야근/피로', '보상 불만', '개인사'],
+					datasets: [{
+						data: keywordData,
+						backgroundColor: ['#4496F5', '#74C0FC', '#A5D8FF', '#D0EBFF', '#E7F5FF'],
+						borderRadius: 4
+					}]
+				},
+				options: { 
+					indexAxis: 'y', 
+					responsive: true, 
+					maintainAspectRatio: false, 
+					plugins: { legend: { display: false } } 
+				}
+			});
+		}
+	};
 
     const sensor = {
         chart: null, 
