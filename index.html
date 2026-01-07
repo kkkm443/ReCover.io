@@ -1660,7 +1660,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
     // ▼▼▼ [여기!] 아까 복사한 Firebase 설정을 이 안에 붙여넣으세요 ▼▼▼
@@ -2907,27 +2907,50 @@ window.app = {
         },
 
         // 6. 댓글 등록 (화면상에서만 동작)
-        addComment: () => {
+        addComment: async () => {
             const input = document.getElementById('cmt-input');
             const txt = input.value.trim();
             if(!txt) return;
 
-            // 화면에 즉시 추가
-            const listBox = document.getElementById('cmt-list-box');
-            if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
-
             const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
             const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
-
-            listBox.innerHTML += `
-                <div class="comment-item">
-                    <div class="cmt-nick">👤 ${adj} ${ani} (나) <span class="cmt-time">방금 전</span></div>
-                    <div class="cmt-body">${txt}</div>
-                </div>
-            `;
             
-            input.value = '';
-            listBox.scrollTop = listBox.scrollHeight;
+            // 1. 저장할 댓글 데이터 만들기
+            const newComment = {
+                nick: `${adj} ${ani}`,
+                text: txt,
+                time: new Date().toISOString()
+            };
+
+            try {
+                // 2. 현재 보고 있는 글(Post)의 ID 가져오기
+                const postId = window.community.currentPostId;
+                if (!postId) { alert("오류: 글 정보를 찾을 수 없습니다."); return; }
+
+                // 3. Firebase에 있는 해당 글에 댓글 추가하기 (Update)
+                // 'commentList'라는 배열에 newComment를 추가(arrayUnion)함
+                await updateDoc(doc(db, "posts", postId), {
+                    commentList: arrayUnion(newComment)
+                });
+
+                // 4. 성공 시 화면에 바로 보여주기 (사용자 경험용)
+                const listBox = document.getElementById('cmt-list-box');
+                if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
+
+                listBox.innerHTML += `
+                    <div class="comment-item">
+                        <div class="cmt-nick">👤 ${newComment.nick} (나) <span class="cmt-time">방금 전</span></div>
+                        <div class="cmt-body">${newComment.text}</div>
+                    </div>
+                `;
+                
+                input.value = ''; // 입력창 비우기
+                listBox.scrollTop = listBox.scrollHeight; // 스크롤 내리기
+
+            } catch (e) {
+                console.error("댓글 저장 실패:", e);
+                alert("댓글을 저장하지 못했습니다.");
+            }
         }
     };
 	
