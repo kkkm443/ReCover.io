@@ -1660,7 +1660,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
     // ▼▼▼ [여기!] 아까 복사한 Firebase 설정을 이 안에 붙여넣으세요 ▼▼▼
@@ -2777,34 +2777,39 @@ window.app = {
         }
     };
 	
-	window.community = {
-        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한','심심한'],
+	// [최종 수정] 좋아요 표시 오류 해결 (실시간 동기화 완벽 대응)
+    window.community = {
+        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한', '심심한'],
         animals: ['너구리', '사슴', '곰', '토끼', '고양이', '강아지', '햄스터', '쿼카'],
         currentPostId: null,
-        posts: [], // 로컬 데이터 임시 저장용
+        posts: [],
 
-        // 1. 초기화 및 실시간 데이터 불러오기
+        // 1. 초기화 및 목록 불러오기
         init: () => {
             document.getElementById('community-view').style.display = 'flex';
             
-            // ★ Firestore에서 글 목록 실시간 감지
             const q = query(collection(db, "posts"), orderBy("time", "desc"));
             
             onSnapshot(q, (snapshot) => {
                 const list = document.getElementById('comm-feed-list');
                 list.innerHTML = ''; 
-                window.community.posts = []; // 데이터 갱신
+                window.community.posts = [];
+
+                // ★ [핵심 수정] 화면이 갱신될 때마다 최신 '좋아요 기록'을 다시 가져옵니다!
+                const myLikes = JSON.parse(localStorage.getItem('my_likes')) || [];
 
                 snapshot.forEach((doc) => {
                     const post = doc.data();
-                    const docId = doc.id; // 문서 ID 저장
+                    const docId = doc.id;
                     
-                    // 로컬 배열에도 저장 (좋아요/댓글 처리를 위해)
                     window.community.posts.push({ id: docId, ...post });
 
                     const dateObj = new Date(post.time);
                     const timeStr = dateObj.getHours() + ":" + String(dateObj.getMinutes()).padStart(2, '0');
                     
+                    // 이제 최신 기록이랑 비교하니까 파란불이 안 꺼집니다.
+                    const isLikedClass = myLikes.includes(docId) ? 'active' : '';
+
                     const item = document.createElement('div');
                     item.className = 'post-card';
                     item.innerHTML = `
@@ -2815,7 +2820,7 @@ window.app = {
                         </div>
                         <div class="post-body">${post.content}</div>
                         <div class="post-footer">
-                            <button class="reaction-btn" onclick="window.community.like(this, '${docId}')">
+                            <button class="reaction-btn ${isLikedClass}" onclick="window.community.like(this, '${docId}')">
                                 ❤️ 공감해요 <span class="like-cnt">${post.likes || 0}</span>
                             </button>
                             <button class="reaction-btn" onclick="window.community.openCommentModal('${docId}')">
@@ -2830,14 +2835,14 @@ window.app = {
             });
         },
 
-        // 2. 글 쓰기 화면 열기
+        // 2. 글 쓰기 창 열기
         openWrite: () => {
             document.getElementById('comm-write-modal').style.display = 'flex';
             document.getElementById('comm-input-text').value = '';
             document.getElementById('comm-input-text').focus();
         },
 
-        // 3. 글 저장하기 (클라우드 전송)
+        // 3. 글 저장 (Firebase)
         post: async () => {
             const txt = document.getElementById('comm-input-text').value.trim();
             if (txt.length < 2) { alert('내용을 입력해주세요!'); return; }
@@ -2863,17 +2868,45 @@ window.app = {
             }
         },
 
-        // 4. 좋아요 (화면상에서만 동작 - 실제 DB 연동은 생략됨)
-        like: (btn, id) => {
+        // 4. 좋아요 (무한 클릭/마이너스 버그 수정판)
+        like: async (btn, id) => {
+            if(btn.disabled) return;
+            btn.disabled = true;
+
+            // 저장된 기록 확인
+            let myLikes = JSON.parse(localStorage.getItem('my_likes')) || [];
+            const isAlreadyLiked = myLikes.includes(id);
+
             const span = btn.querySelector('.like-cnt');
-            let cnt = parseInt(span.innerText);
-            
-            if (btn.classList.contains('active')) {
+            let currentCnt = parseInt(span.innerText) || 0;
+            let changeVal = 0;
+
+            if (isAlreadyLiked) {
+                // 취소 로직
+                changeVal = -1;
+                myLikes = myLikes.filter(itemId => itemId !== id);
                 btn.classList.remove('active');
-                span.innerText = cnt - 1;
+                span.innerText = Math.max(0, currentCnt - 1); // 0 밑으로 안 내려가게 방어
             } else {
+                // 좋아요 로직
+                changeVal = 1;
+                myLikes.push(id);
                 btn.classList.add('active');
-                span.innerText = cnt + 1;
+                span.innerText = currentCnt + 1;
+            }
+
+            // 내 폰에 저장
+            localStorage.setItem('my_likes', JSON.stringify(myLikes));
+
+            try {
+                // 서버 전송
+                await updateDoc(doc(db, "posts", id), {
+                    likes: increment(changeVal)
+                });
+            } catch (e) {
+                console.error("좋아요 실패:", e);
+            } finally {
+                setTimeout(() => { btn.disabled = false; }, 300);
             }
         },
 
@@ -2881,8 +2914,6 @@ window.app = {
         openCommentModal: (id) => {
             window.community.currentPostId = id;
             const target = window.community.posts.find(p => p.id === id);
-            
-            // 데이터가 없으면 빈 값 처리
             const comments = target && target.commentList ? target.commentList : [];
 
             const modal = document.getElementById('comm-comment-modal');
@@ -2906,7 +2937,7 @@ window.app = {
             modal.style.display = 'flex';
         },
 
-        // 6. 댓글 등록 (화면상에서만 동작)
+        // 6. 댓글 등록 (DB 저장)
         addComment: async () => {
             const input = document.getElementById('cmt-input');
             const txt = input.value.trim();
@@ -2915,7 +2946,6 @@ window.app = {
             const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
             const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
             
-            // 1. 저장할 댓글 데이터 만들기
             const newComment = {
                 nick: `${adj} ${ani}`,
                 text: txt,
@@ -2923,17 +2953,13 @@ window.app = {
             };
 
             try {
-                // 2. 현재 보고 있는 글(Post)의 ID 가져오기
                 const postId = window.community.currentPostId;
                 if (!postId) { alert("오류: 글 정보를 찾을 수 없습니다."); return; }
 
-                // 3. Firebase에 있는 해당 글에 댓글 추가하기 (Update)
-                // 'commentList'라는 배열에 newComment를 추가(arrayUnion)함
                 await updateDoc(doc(db, "posts", postId), {
                     commentList: arrayUnion(newComment)
                 });
 
-                // 4. 성공 시 화면에 바로 보여주기 (사용자 경험용)
                 const listBox = document.getElementById('cmt-list-box');
                 if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
 
@@ -2944,9 +2970,8 @@ window.app = {
                     </div>
                 `;
                 
-                input.value = ''; // 입력창 비우기
-                listBox.scrollTop = listBox.scrollHeight; // 스크롤 내리기
-
+                input.value = '';
+                listBox.scrollTop = listBox.scrollHeight;
             } catch (e) {
                 console.error("댓글 저장 실패:", e);
                 alert("댓글을 저장하지 못했습니다.");
