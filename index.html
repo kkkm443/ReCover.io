@@ -1602,9 +1602,13 @@
 	<div class="modal-bg" id="comm-write-modal" onclick="this.style.display='none'" style="z-index: 200;">
 		<div class="card" style="width:90%; max-width:340px; padding:20px;" onclick="event.stopPropagation()">
 			<h3 style="margin-top:0;">익명으로 말하기</h3>
-			<textarea id="comm-input-text" placeholder="임금님 귀는 당나귀 귀!&#13;&#10;동료들에게 하고 싶은 말이나 고민을 털어놓으세요." 
-			style="width:100%; height:120px; padding:15px; border:1px solid #ddd; border-radius:12px; resize:none; outline:none; font-family:inherit; margin-bottom:15px;"></textarea>
 			
+            <textarea id="comm-input-text" placeholder="임금님 귀는 당나귀 귀!&#13;&#10;동료들에게 하고 싶은 말이나 고민을 털어놓으세요." 
+			style="width:100%; height:120px; padding:15px; border:1px solid #ddd; border-radius:12px; resize:none; outline:none; font-family:inherit; margin-bottom:10px;"></textarea>
+			
+            <input type="password" id="comm-pw-input" placeholder="비밀번호 (수정/삭제용)" maxlength="4"
+            style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; margin-bottom:15px; outline:none; font-family:inherit;">
+
 			<div style="display:flex; gap:10px;">
 				<button onclick="document.getElementById('comm-write-modal').style.display='none'" style="flex:1; padding:12px; background:#f1f3f5; border:none; border-radius:10px; font-weight:bold; color:#666;">취소</button>
 				<button onclick="window.community.post()" style="flex:1; padding:12px; background:var(--brand); border:none; border-radius:10px; font-weight:bold; color:white;">등록</button>
@@ -1660,7 +1664,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, arrayUnion, increment, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
 
     // ▼▼▼ [여기!] 아까 복사한 Firebase 설정을 이 안에 붙여넣으세요 ▼▼▼
@@ -2779,35 +2783,29 @@ window.app = {
 	
 	// [최종 수정] 좋아요 표시 오류 해결 (실시간 동기화 완벽 대응)
     window.community = {
-        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한', '심심한'],
-        animals: ['너구리', '사슴', '곰', '토끼', '고양이', '강아지', '햄스터', '쿼카'],
+        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한','심심한', '월급루팡', '칼퇴하는', '상큼한'],
+        animals: ['너구리', '사슴', '곰', '토끼', '고양이', '강아지', '햄스터', '쿼카', '판다', '나무늘보', '알파카'],
         currentPostId: null,
         posts: [],
 
         // 1. 초기화 및 목록 불러오기
         init: () => {
             document.getElementById('community-view').style.display = 'flex';
-            
             const q = query(collection(db, "posts"), orderBy("time", "desc"));
             
             onSnapshot(q, (snapshot) => {
                 const list = document.getElementById('comm-feed-list');
                 list.innerHTML = ''; 
                 window.community.posts = [];
-
-                // ★ [핵심 수정] 화면이 갱신될 때마다 최신 '좋아요 기록'을 다시 가져옵니다!
                 const myLikes = JSON.parse(localStorage.getItem('my_likes')) || [];
 
                 snapshot.forEach((doc) => {
                     const post = doc.data();
                     const docId = doc.id;
-                    
                     window.community.posts.push({ id: docId, ...post });
 
                     const dateObj = new Date(post.time);
                     const timeStr = dateObj.getHours() + ":" + String(dateObj.getMinutes()).padStart(2, '0');
-                    
-                    // 이제 최신 기록이랑 비교하니까 파란불이 안 꺼집니다.
                     const isLikedClass = myLikes.includes(docId) ? 'active' : '';
 
                     const item = document.createElement('div');
@@ -2815,8 +2813,11 @@ window.app = {
                     item.innerHTML = `
                         <div class="post-header">
                             <div class="post-avatar">👤</div>
-                            <div class="post-nick">${post.nick}</div>
-                            <div class="post-time">${timeStr}</div>
+                            <div style="flex:1;">
+                                <div class="post-nick">${post.nick}</div>
+                                <div class="post-time">${timeStr}</div>
+                            </div>
+                            <button onclick="window.community.showOptions('${docId}')" style="border:none; background:none; color:#999; font-weight:bold; cursor:pointer; padding:5px;">⋮</button>
                         </div>
                         <div class="post-body">${post.content}</div>
                         <div class="post-footer">
@@ -2830,7 +2831,6 @@ window.app = {
                     `;
                     list.appendChild(item);
                 });
-                
                 document.getElementById('comm-user-count').innerText = 140 + snapshot.size;
             });
         },
@@ -2839,13 +2839,17 @@ window.app = {
         openWrite: () => {
             document.getElementById('comm-write-modal').style.display = 'flex';
             document.getElementById('comm-input-text').value = '';
+            document.getElementById('comm-pw-input').value = ''; // 비번 초기화
             document.getElementById('comm-input-text').focus();
         },
 
-        // 3. 글 저장 (Firebase)
+        // 3. 글 저장 (비밀번호 포함)
         post: async () => {
             const txt = document.getElementById('comm-input-text').value.trim();
+            const pw = document.getElementById('comm-pw-input').value.trim();
+
             if (txt.length < 2) { alert('내용을 입력해주세요!'); return; }
+            if (pw.length < 1) { alert('나중에 삭제하려면 비밀번호가 필요해요!'); return; }
 
             const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
             const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
@@ -2853,6 +2857,7 @@ window.app = {
             const newPost = {
                 nick: `${adj} ${ani}`,
                 content: txt,
+                password: pw, // 비밀번호 저장
                 time: new Date().toISOString(),
                 likes: 0,
                 commentList: []
@@ -2861,73 +2866,95 @@ window.app = {
             try {
                 await addDoc(collection(db, "posts"), newPost);
                 document.getElementById('comm-write-modal').style.display = 'none';
-                alert('🎋 대나무 숲에 이야기가 등록되었습니다.');
+                alert('🎋 대나무 숲에 등록되었습니다.');
             } catch (e) {
                 console.error("에러:", e);
-                alert("글 저장 중 오류가 발생했습니다.");
+                alert("오류가 발생했습니다.");
             }
         },
 
-        // 4. 좋아요 (무한 클릭/마이너스 버그 수정판)
+        // 4. 삭제/수정 메뉴
+        showOptions: async (id) => {
+            const action = prompt("원하는 동작을 입력해주세요.\n(1: 삭제, 2: 수정)");
+            if(action === '1') {
+                const pw = prompt("글 작성 시 설정한 비밀번호를 입력하세요.");
+                if(!pw) return;
+                
+                // DB에서 비밀번호 확인
+                const docRef = doc(db, "posts", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists() && docSnap.data().password === pw) {
+                    if(confirm("정말 삭제하시겠습니까?")) {
+                        await deleteDoc(docRef);
+                        alert("삭제되었습니다.");
+                    }
+                } else {
+                    alert("비밀번호가 일치하지 않습니다.");
+                }
+            } else if(action === '2') {
+                const pw = prompt("글 작성 시 설정한 비밀번호를 입력하세요.");
+                if(!pw) return;
+
+                const docRef = doc(db, "posts", id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().password === pw) {
+                    const newContent = prompt("수정할 내용을 입력하세요.", docSnap.data().content);
+                    if(newContent) {
+                        await updateDoc(docRef, { content: newContent });
+                        alert("수정되었습니다.");
+                    }
+                } else {
+                    alert("비밀번호가 일치하지 않습니다.");
+                }
+            }
+        },
+
+        // 5. 좋아요 (기존 유지)
         like: async (btn, id) => {
             if(btn.disabled) return;
             btn.disabled = true;
-
-            // 저장된 기록 확인
             let myLikes = JSON.parse(localStorage.getItem('my_likes')) || [];
             const isAlreadyLiked = myLikes.includes(id);
-
             const span = btn.querySelector('.like-cnt');
             let currentCnt = parseInt(span.innerText) || 0;
             let changeVal = 0;
 
             if (isAlreadyLiked) {
-                // 취소 로직
                 changeVal = -1;
                 myLikes = myLikes.filter(itemId => itemId !== id);
                 btn.classList.remove('active');
-                span.innerText = Math.max(0, currentCnt - 1); // 0 밑으로 안 내려가게 방어
+                span.innerText = Math.max(0, currentCnt - 1);
             } else {
-                // 좋아요 로직
                 changeVal = 1;
                 myLikes.push(id);
                 btn.classList.add('active');
                 span.innerText = currentCnt + 1;
             }
-
-            // 내 폰에 저장
             localStorage.setItem('my_likes', JSON.stringify(myLikes));
-
             try {
-                // 서버 전송
-                await updateDoc(doc(db, "posts", id), {
-                    likes: increment(changeVal)
-                });
-            } catch (e) {
-                console.error("좋아요 실패:", e);
-            } finally {
-                setTimeout(() => { btn.disabled = false; }, 300);
-            }
+                await updateDoc(doc(db, "posts", id), { likes: increment(changeVal) });
+            } catch (e) { console.error(e); } finally { setTimeout(() => { btn.disabled = false; }, 300); }
         },
 
-        // 5. 댓글 모달 열기
+        // 6. 댓글 모달 열기
         openCommentModal: (id) => {
             window.community.currentPostId = id;
             const target = window.community.posts.find(p => p.id === id);
             const comments = target && target.commentList ? target.commentList : [];
-
             const modal = document.getElementById('comm-comment-modal');
             const listBox = document.getElementById('cmt-list-box');
             document.getElementById('cmt-total-cnt').innerText = comments.length;
             
             listBox.innerHTML = ''; 
-
             if(comments.length === 0) {
                 listBox.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</div>';
             } else {
                 comments.forEach(cmt => {
+                    // 댓글 클릭 시 답글 달기 기능 (window.community.replyTo)
                     listBox.innerHTML += `
-                        <div class="comment-item">
+                        <div class="comment-item" onclick="window.community.replyTo('${cmt.nick}')" style="cursor:pointer;">
                             <div class="cmt-nick">👤 ${cmt.nick || '익명'} <span class="cmt-time">방금 전</span></div>
                             <div class="cmt-body">${cmt.text}</div>
                         </div>
@@ -2937,7 +2964,14 @@ window.app = {
             modal.style.display = 'flex';
         },
 
-        // 6. 댓글 등록 (DB 저장)
+        // 7. 답글 기능 (닉네임 클릭 시 호출)
+        replyTo: (nick) => {
+            const input = document.getElementById('cmt-input');
+            input.value = `@${nick} `; // 멘션 자동 입력
+            input.focus();
+        },
+
+        // 8. 댓글 등록
         addComment: async () => {
             const input = document.getElementById('cmt-input');
             const txt = input.value.trim();
@@ -2945,36 +2979,25 @@ window.app = {
 
             const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
             const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
-            
-            const newComment = {
-                nick: `${adj} ${ani}`,
-                text: txt,
-                time: new Date().toISOString()
-            };
+            const newComment = { nick: `${adj} ${ani}`, text: txt, time: new Date().toISOString() };
 
             try {
                 const postId = window.community.currentPostId;
-                if (!postId) { alert("오류: 글 정보를 찾을 수 없습니다."); return; }
-
-                await updateDoc(doc(db, "posts", postId), {
-                    commentList: arrayUnion(newComment)
-                });
-
+                await updateDoc(doc(db, "posts", postId), { commentList: arrayUnion(newComment) });
+                
+                // 화면 즉시 반영
                 const listBox = document.getElementById('cmt-list-box');
                 if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
-
                 listBox.innerHTML += `
-                    <div class="comment-item">
+                    <div class="comment-item" onclick="window.community.replyTo('${newComment.nick}')">
                         <div class="cmt-nick">👤 ${newComment.nick} (나) <span class="cmt-time">방금 전</span></div>
                         <div class="cmt-body">${newComment.text}</div>
                     </div>
                 `;
-                
                 input.value = '';
                 listBox.scrollTop = listBox.scrollHeight;
             } catch (e) {
                 console.error("댓글 저장 실패:", e);
-                alert("댓글을 저장하지 못했습니다.");
             }
         }
     };
