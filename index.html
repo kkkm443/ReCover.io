@@ -893,7 +893,32 @@
 		.cmt-input-area {
 			display: flex; gap: 8px; border-top: 1px solid #eee; padding-top: 15px;
 		}
-				
+		
+		.comment-item.reply-mode {
+			margin-left: 20px; /* 오른쪽으로 밀기 */
+			background: #F8F9FA; /* 배경색 살짝 다르게 */
+			border-left: 3px solid #DDEBF6; /* 왼쪽에 파란 줄 */
+			padding-left: 12px; /* 줄과 내용 사이 간격 */
+		}
+
+		.mention-badge {
+			display: inline-block;
+			background: #E3F2FD; /* 연한 파란 배경 */
+			color: var(--brand);  /* 파란 글씨 */
+			font-weight: 800;
+			font-size: 11px;
+			padding: 2px 6px;
+			border-radius: 4px;
+			margin-right: 4px;
+			margin-bottom: 4px;
+		}
+
+		.reply-icon {
+			font-size: 12px;
+			color: #aaa;
+			margin-right: 4px;
+			user-select: none;
+		}
     </style>
 </head>
 <body>
@@ -2948,15 +2973,36 @@ window.app = {
             document.getElementById('cmt-total-cnt').innerText = comments.length;
             
             listBox.innerHTML = ''; 
+
             if(comments.length === 0) {
                 listBox.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</div>';
             } else {
                 comments.forEach(cmt => {
-                    // 댓글 클릭 시 답글 달기 기능 (window.community.replyTo)
+                    // ★ [핵심] 텍스트가 '@'로 시작하면 답글로 판단
+                    let isReply = cmt.text.startsWith("@");
+                    let displayBody = cmt.text;
+                    let replyClass = "";
+                    let replyIcon = "";
+
+                    if (isReply) {
+                        // [수정] 닉네임이 "행복한 햄스터"처럼 두 단어니까, '두 번째' 공백을 찾습니다.
+                        const firstSpace = cmt.text.indexOf(' ');
+                        const secondSpace = cmt.text.indexOf(' ', firstSpace + 1);
+
+                        // 두 번째 공백이 있어야 정상적인 "닉네임 + 메시지" 형태입니다.
+                        if (secondSpace > 0) {
+                            const mention = cmt.text.substring(0, secondSpace); // @행복한 햄스터
+                            const msg = cmt.text.substring(secondSpace + 1);    // 손!!!!
+                            
+                            displayBody = `<span class="reply-icon">↳</span><span class="mention-badge">${mention}</span>${msg}`;
+                            replyClass = "reply-mode";
+                        }
+                    }
+
                     listBox.innerHTML += `
-                        <div class="comment-item" onclick="window.community.replyTo('${cmt.nick}')" style="cursor:pointer;">
+                        <div class="comment-item ${replyClass}" onclick="window.community.replyTo('${cmt.nick}')" style="cursor:pointer;">
                             <div class="cmt-nick">👤 ${cmt.nick || '익명'} <span class="cmt-time">방금 전</span></div>
-                            <div class="cmt-body">${cmt.text}</div>
+                            <div class="cmt-body">${displayBody}</div>
                         </div>
                     `;
                 });
