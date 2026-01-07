@@ -830,6 +830,70 @@
 			cursor: pointer; transition: 0.2s;
 		}
 		.pg-pay-btn:disabled { background: #ccc; cursor: not-allowed; }
+		
+		/* [신규] 대나무 숲(커뮤니티) 스타일 */
+		#community-view {
+			position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: #F0F2F5; z-index: 160; display: none; flex-direction: column;
+		}
+
+		.comm-header {
+			background: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+			border-bottom: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+		}
+
+		.comm-feed { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
+
+		.post-card {
+			background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.02); position: relative;
+		}
+
+		.post-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+		.post-avatar {
+			width: 32px; height: 32px; background: #E3F2FD; color: var(--brand);
+			border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px;
+		}
+		.post-nick { font-size: 13px; font-weight: bold; color: #333; }
+		.post-time { font-size: 11px; color: #999; margin-left: auto; }
+
+		.post-body { font-size: 14px; line-height: 1.6; color: #444; white-space: pre-wrap; margin-bottom: 15px; }
+
+		.post-footer { display: flex; gap: 10px; border-top: 1px solid #f5f5f5; padding-top: 12px; }
+		.reaction-btn {
+			background: #f8f9fa; border: none; padding: 6px 12px; border-radius: 20px;
+			font-size: 12px; color: #555; cursor: pointer; display: flex; align-items: center; gap: 4px;
+			transition: 0.2s;
+		}
+		.reaction-btn:hover { background: #e9ecef; }
+		.reaction-btn.active { background: #E3F2FD; color: var(--brand); font-weight: bold; }
+
+		/* 글쓰기 플로팅 버튼 (FAB) */
+		.fab-write {
+			position: absolute; bottom: 30px; right: 20px;
+			width: 56px; height: 56px; background: var(--brand); color: white;
+			border-radius: 50%; box-shadow: 0 4px 15px rgba(68, 150, 245, 0.4);
+			display: flex; align-items: center; justify-content: center;
+			font-size: 24px; cursor: pointer; border: none; transition: transform 0.2s;
+		}
+		.fab-write:active { transform: scale(0.9); }
+		/* [신규] 댓글 모달 디자인 */
+		#comm-comment-modal .card {
+			height: 80vh; display: flex; flex-direction: column;
+		}
+		.comment-list {
+			flex: 1; overflow-y: auto; background: #f8f9fa; margin: 10px -20px; padding: 15px 20px;
+		}
+		.comment-item {
+			margin-bottom: 12px; font-size: 13px;
+		}
+		.cmt-nick { font-weight: bold; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; }
+		.cmt-time { font-size: 10px; color: #999; font-weight: normal; }
+		.cmt-body { background: white; padding: 8px 12px; border-radius: 0 12px 12px 12px; border: 1px solid #eee; display: inline-block; max-width: 90%; line-height: 1.4; }
+		.cmt-input-area {
+			display: flex; gap: 8px; border-top: 1px solid #eee; padding-top: 15px;
+		}
+				
     </style>
 </head>
 <body>
@@ -902,7 +966,15 @@
                     <span style="font-size:10px; color:#00D2BA;">정시 퇴근</span>
                 </div>
             </div>
-
+			
+			<div class="card" onclick="window.community.init()" style="margin-top:15px; background:linear-gradient(to right, #2E7D32, #43A047); color:white; cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+				<div>
+					<div style="font-weight:bold; font-size:16px; margin-bottom:4px;">🎋 속 시원한 대나무 숲</div>
+					<div style="font-size:12px; opacity:0.9;">임금님 귀는 당나귀 귀! <br>동료들과 익명으로 소통해요.</div>
+				</div>
+				<div style="font-size:32px;">🐼</div>
+			</div>
+			
             <div class="card" style="background: linear-gradient(135deg, #4496F5); color: white; margin-top:16px; text-align: center;">
 				<div style="font-size: 40px; margin-bottom: 5px;">💬</div>
 				<h3 style="margin:0 0 10px 0;">회사 모르게 상담받기</h3>
@@ -1512,6 +1584,49 @@
         <button id="pg-action-btn" class="pg-pay-btn" onclick="window.pg.pay()">결제하기</button>
     </div>
 	</div>
+	<div id="community-view">
+		<div class="comm-header">
+			<div style="display:flex; align-items:center; gap:8px;">
+				<button onclick="document.getElementById('community-view').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">←</button>
+				<div style="font-weight:bold; font-size:18px;">🎋 익명 대나무 숲</div>
+			</div>
+			<div style="font-size:12px; color:#888;">참여자 <b id="comm-user-count">142</b>명</div>
+		</div>
+
+		<div class="comm-feed" id="comm-feed-list">
+			</div>
+
+		<button class="fab-write" onclick="window.community.openWrite()">✏️</button>
+	</div>
+
+	<div class="modal-bg" id="comm-write-modal" onclick="this.style.display='none'" style="z-index: 200;">
+		<div class="card" style="width:90%; max-width:340px; padding:20px;" onclick="event.stopPropagation()">
+			<h3 style="margin-top:0;">익명으로 말하기</h3>
+			<textarea id="comm-input-text" placeholder="임금님 귀는 당나귀 귀!&#13;&#10;동료들에게 하고 싶은 말이나 고민을 털어놓으세요." 
+			style="width:100%; height:120px; padding:15px; border:1px solid #ddd; border-radius:12px; resize:none; outline:none; font-family:inherit; margin-bottom:15px;"></textarea>
+			
+			<div style="display:flex; gap:10px;">
+				<button onclick="document.getElementById('comm-write-modal').style.display='none'" style="flex:1; padding:12px; background:#f1f3f5; border:none; border-radius:10px; font-weight:bold; color:#666;">취소</button>
+				<button onclick="window.community.post()" style="flex:1; padding:12px; background:var(--brand); border:none; border-radius:10px; font-weight:bold; color:white;">등록</button>
+			</div>
+		</div>
+	</div>
+	<div class="modal-bg" id="comm-comment-modal" onclick="this.style.display='none'" style="z-index: 200;">
+		<div class="card" style="width:100%; max-width:450px; border-radius: 20px 20px 0 0; margin-top: auto; margin-bottom: 0;" onclick="event.stopPropagation()">
+			<div style="display:flex; justify-content:space-between; align-items:center;">
+				<h3 style="margin:0;">💬 댓글 <span id="cmt-total-cnt" style="color:var(--brand);">0</span></h3>
+				<button onclick="document.getElementById('comm-comment-modal').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">×</button>
+			</div>
+			
+			<div class="comment-list" id="cmt-list-box">
+				</div>
+
+			<div class="cmt-input-area">
+				<input type="text" id="cmt-input" placeholder="따뜻한 한마디를 남겨주세요..." style="flex:1; padding:12px; border:1px solid #ddd; border-radius:20px; outline:none;">
+				<button onclick="window.community.addComment()" style="background:var(--brand); color:white; border:none; width:50px; border-radius:12px; font-weight:bold; cursor:pointer;">등록</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="modal-bg" id="privacy-modal" onclick="this.style.display='none'">
@@ -1544,8 +1659,27 @@
 </div>
 
 <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { GoogleGenerativeAI } from "https://esm.run/@google/generative-ai";
-    const API_KEY = "api예시"; 
+
+    // ▼▼▼ [여기!] 아까 복사한 Firebase 설정을 이 안에 붙여넣으세요 ▼▼▼
+    const firebaseConfig = {
+	  apiKey: "AIzaSyDgbxh4Q0uCwHglA23BZLw9CRAW2TLefEY",
+	  authDomain: "re-cover-67c0d.firebaseapp.com",
+	  projectId: "re-cover-67c0d",
+	  storageBucket: "re-cover-67c0d.firebasestorage.app",
+	  messagingSenderId: "138248073056",
+	  appId: "1:138248073056:web:fa5f6aba115438bb2df805",
+	  measurementId: "G-1PVC9CWHCB"
+	};
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+    // 2. Firebase 실행 (데이터베이스 연결)
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const API_KEY = "api예시"; // 기존 AI 키 유지
 
     let genAI = null; 
     let chatSession = null; 
@@ -1700,8 +1834,8 @@ window.app = {
         },
         
         getTier: (points) => {
-            if (points >= 25000) return "🌈 Lv.6 마음낙원";
-            if (points >= 10000) return "🌲 Lv.5 마음숲";
+            if (points >= 25000) return "🌈 Lv.6 마음의 낙원";
+            if (points >= 10000) return "🌲 Lv.5 마음의 숲";
             if (points >= 8000) return "🌳 Lv.4 마음정원사";
             if (points >= 5000) return "🌸 Lv.3 마음꽃나무";
             if (points >= 2500) return "🌿 Lv.2 마음새싹";
@@ -2643,6 +2777,160 @@ window.app = {
         }
     };
 	
+	window.community = {
+        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한','심심한'],
+        animals: ['너구리', '사슴', '곰', '토끼', '고양이', '강아지', '햄스터', '쿼카'],
+        currentPostId: null,
+        posts: [], // 로컬 데이터 임시 저장용
+
+        // 1. 초기화 및 실시간 데이터 불러오기
+        init: () => {
+            document.getElementById('community-view').style.display = 'flex';
+            
+            // ★ Firestore에서 글 목록 실시간 감지
+            const q = query(collection(db, "posts"), orderBy("time", "desc"));
+            
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('comm-feed-list');
+                list.innerHTML = ''; 
+                window.community.posts = []; // 데이터 갱신
+
+                snapshot.forEach((doc) => {
+                    const post = doc.data();
+                    const docId = doc.id; // 문서 ID 저장
+                    
+                    // 로컬 배열에도 저장 (좋아요/댓글 처리를 위해)
+                    window.community.posts.push({ id: docId, ...post });
+
+                    const dateObj = new Date(post.time);
+                    const timeStr = dateObj.getHours() + ":" + String(dateObj.getMinutes()).padStart(2, '0');
+                    
+                    const item = document.createElement('div');
+                    item.className = 'post-card';
+                    item.innerHTML = `
+                        <div class="post-header">
+                            <div class="post-avatar">👤</div>
+                            <div class="post-nick">${post.nick}</div>
+                            <div class="post-time">${timeStr}</div>
+                        </div>
+                        <div class="post-body">${post.content}</div>
+                        <div class="post-footer">
+                            <button class="reaction-btn" onclick="window.community.like(this, '${docId}')">
+                                ❤️ 공감해요 <span class="like-cnt">${post.likes || 0}</span>
+                            </button>
+                            <button class="reaction-btn" onclick="window.community.openCommentModal('${docId}')">
+                                💬 댓글 ${post.commentList ? post.commentList.length : 0}
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+                
+                document.getElementById('comm-user-count').innerText = 140 + snapshot.size;
+            });
+        },
+
+        // 2. 글 쓰기 화면 열기
+        openWrite: () => {
+            document.getElementById('comm-write-modal').style.display = 'flex';
+            document.getElementById('comm-input-text').value = '';
+            document.getElementById('comm-input-text').focus();
+        },
+
+        // 3. 글 저장하기 (클라우드 전송)
+        post: async () => {
+            const txt = document.getElementById('comm-input-text').value.trim();
+            if (txt.length < 2) { alert('내용을 입력해주세요!'); return; }
+
+            const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
+            const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
+
+            const newPost = {
+                nick: `${adj} ${ani}`,
+                content: txt,
+                time: new Date().toISOString(),
+                likes: 0,
+                commentList: []
+            };
+
+            try {
+                await addDoc(collection(db, "posts"), newPost);
+                document.getElementById('comm-write-modal').style.display = 'none';
+                alert('🎋 대나무 숲에 이야기가 등록되었습니다.');
+            } catch (e) {
+                console.error("에러:", e);
+                alert("글 저장 중 오류가 발생했습니다.");
+            }
+        },
+
+        // 4. 좋아요 (화면상에서만 동작 - 실제 DB 연동은 생략됨)
+        like: (btn, id) => {
+            const span = btn.querySelector('.like-cnt');
+            let cnt = parseInt(span.innerText);
+            
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                span.innerText = cnt - 1;
+            } else {
+                btn.classList.add('active');
+                span.innerText = cnt + 1;
+            }
+        },
+
+        // 5. 댓글 모달 열기
+        openCommentModal: (id) => {
+            window.community.currentPostId = id;
+            const target = window.community.posts.find(p => p.id === id);
+            
+            // 데이터가 없으면 빈 값 처리
+            const comments = target && target.commentList ? target.commentList : [];
+
+            const modal = document.getElementById('comm-comment-modal');
+            const listBox = document.getElementById('cmt-list-box');
+            document.getElementById('cmt-total-cnt').innerText = comments.length;
+            
+            listBox.innerHTML = ''; 
+
+            if(comments.length === 0) {
+                listBox.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</div>';
+            } else {
+                comments.forEach(cmt => {
+                    listBox.innerHTML += `
+                        <div class="comment-item">
+                            <div class="cmt-nick">👤 ${cmt.nick || '익명'} <span class="cmt-time">방금 전</span></div>
+                            <div class="cmt-body">${cmt.text}</div>
+                        </div>
+                    `;
+                });
+            }
+            modal.style.display = 'flex';
+        },
+
+        // 6. 댓글 등록 (화면상에서만 동작)
+        addComment: () => {
+            const input = document.getElementById('cmt-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            // 화면에 즉시 추가
+            const listBox = document.getElementById('cmt-list-box');
+            if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
+
+            const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
+            const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
+
+            listBox.innerHTML += `
+                <div class="comment-item">
+                    <div class="cmt-nick">👤 ${adj} ${ani} (나) <span class="cmt-time">방금 전</span></div>
+                    <div class="cmt-body">${txt}</div>
+                </div>
+            `;
+            
+            input.value = '';
+            listBox.scrollTop = listBox.scrollHeight;
+        }
+    };
+	
 </script>
 <div class="modal-bg" id="exchange-modal" onclick="this.style.display='none'">
     <div class="card" style="width:90%; max-width:350px;" onclick="event.stopPropagation()">
@@ -2776,8 +3064,5 @@ window.app = {
         </div>
     </div>
 </div>
-
-
-
 </body>
 </html>
