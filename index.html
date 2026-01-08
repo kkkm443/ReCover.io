@@ -919,6 +919,30 @@
 			margin-right: 4px;
 			user-select: none;
 		}
+		
+		/* [신규] 댓글 삭제 버튼 & 시간 표시 스타일 */
+		.cmt-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 2px;
+		}
+		.cmt-info {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			font-weight: bold;
+		}
+		.cmt-del-btn {
+			border: none;
+			background: none;
+			color: #ddd;
+			font-size: 16px;
+			cursor: pointer;
+			padding: 0 5px;
+			line-height: 1;
+		}
+		.cmt-del-btn:hover { color: #FF6B6B; }
     </style>
 </head>
 <body>
@@ -1651,9 +1675,10 @@
 				</div>
 
 			<div class="cmt-input-area">
-				<input type="text" id="cmt-input" placeholder="따뜻한 한마디를 남겨주세요..." style="flex:1; padding:12px; border:1px solid #ddd; border-radius:20px; outline:none;">
-				<button onclick="window.community.addComment()" style="background:var(--brand); color:white; border:none; width:50px; border-radius:12px; font-weight:bold; cursor:pointer;">등록</button>
-			</div>
+                <input type="text" id="cmt-input" placeholder="따뜻한 한마디를 남겨주세요..." style="flex:1; padding:12px; border:1px solid #ddd; border-radius:20px; outline:none;">
+                <input type="password" id="cmt-pw" placeholder="비번" maxlength="4" style="width:50px; padding:12px; border:1px solid #ddd; border-radius:20px; outline:none; text-align:center;">
+                <button onclick="window.community.addComment()" style="background:var(--brand); color:white; border:none; width:50px; border-radius:12px; font-weight:bold; cursor:pointer;">등록</button>
+            </div>
 		</div>
 	</div>
 </div>
@@ -2808,12 +2833,31 @@ window.app = {
 	
 	// [최종 수정] 좋아요 표시 오류 해결 (실시간 동기화 완벽 대응)
     window.community = {
-        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한','심심한', '월급루팡', '칼퇴하는', '상큼한'],
+        adjectives: ['행복한', '지친', '배고픈', '졸린', '신난', '화난', '즐거운', '몽롱한', '심심한', '월급루팡', '칼퇴하는', '상큼한'],
         animals: ['너구리', '사슴', '곰', '토끼', '고양이', '강아지', '햄스터', '쿼카', '판다', '나무늘보', '알파카'],
         currentPostId: null,
         posts: [],
 
-        // 1. 초기화 및 목록 불러오기
+        // ★ [신규] 시간을 '방금 전', '1시간 전' 등으로 바꿔주는 함수
+        timeForToday: (value) => {
+            const today = new Date();
+            const timeValue = new Date(value);
+
+            const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
+            if (betweenTime < 1) return '방금 전';
+            if (betweenTime < 60) return `${betweenTime}분 전`;
+
+            const betweenTimeHour = Math.floor(betweenTime / 60);
+            if (betweenTimeHour < 24) return `${betweenTimeHour}시간 전`;
+
+            const year = timeValue.getFullYear();
+            const month = String(timeValue.getMonth() + 1).padStart(2, '0');
+            const day = String(timeValue.getDate()).padStart(2, '0');
+
+            return `${year}.${month}.${day}`;
+        },
+
+        // 1. 초기화 및 목록 불러오기 (게시글 시간 표시 적용)
         init: () => {
             document.getElementById('community-view').style.display = 'flex';
             const q = query(collection(db, "posts"), orderBy("time", "desc"));
@@ -2829,8 +2873,8 @@ window.app = {
                     const docId = doc.id;
                     window.community.posts.push({ id: docId, ...post });
 
-                    const dateObj = new Date(post.time);
-                    const timeStr = dateObj.getHours() + ":" + String(dateObj.getMinutes()).padStart(2, '0');
+                    // [수정] 함수를 사용하여 상대적 시간 표시
+                    const timeStr = window.community.timeForToday(post.time);
                     const isLikedClass = myLikes.includes(docId) ? 'active' : '';
 
                     const item = document.createElement('div');
@@ -2864,11 +2908,11 @@ window.app = {
         openWrite: () => {
             document.getElementById('comm-write-modal').style.display = 'flex';
             document.getElementById('comm-input-text').value = '';
-            document.getElementById('comm-pw-input').value = ''; // 비번 초기화
+            document.getElementById('comm-pw-input').value = '';
             document.getElementById('comm-input-text').focus();
         },
 
-        // 3. 글 저장 (비밀번호 포함)
+        // 3. 글 저장
         post: async () => {
             const txt = document.getElementById('comm-input-text').value.trim();
             const pw = document.getElementById('comm-pw-input').value.trim();
@@ -2882,7 +2926,7 @@ window.app = {
             const newPost = {
                 nick: `${adj} ${ani}`,
                 content: txt,
-                password: pw, // 비밀번호 저장
+                password: pw,
                 time: new Date().toISOString(),
                 likes: 0,
                 commentList: []
@@ -2898,45 +2942,46 @@ window.app = {
             }
         },
 
-        // 4. 삭제/수정 메뉴
+        // 4. 글 삭제/수정 메뉴
         showOptions: async (id) => {
             const action = prompt("원하는 동작을 입력해주세요.\n(1: 삭제, 2: 수정)");
-            if(action === '1') {
+            if (!action) return;
+
+            const docRef = doc(db, "posts", id);
+            const docSnap = await getDoc(docRef);
+
+            if (!docSnap.exists()) { alert("이미 삭제된 글입니다."); return; }
+            
+            const post = docSnap.data();
+            let isAuth = false;
+
+            // 비밀번호 없는 옛날 글은 바로 통과
+            if (!post.password) {
+                alert("🔒 비밀번호가 없는 예전 글입니다.\n(본인 글이 맞다면 바로 처리됩니다)");
+                isAuth = true; 
+            } else {
                 const pw = prompt("글 작성 시 설정한 비밀번호를 입력하세요.");
-                if(!pw) return;
-                
-                // DB에서 비밀번호 확인
-                const docRef = doc(db, "posts", id);
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists() && docSnap.data().password === pw) {
-                    if(confirm("정말 삭제하시겠습니까?")) {
+                if (post.password === pw) isAuth = true;
+                else alert("⛔ 비밀번호가 일치하지 않습니다.");
+            }
+
+            if (isAuth) {
+                if (action === '1') {
+                    if (confirm("정말 삭제하시겠습니까?")) {
                         await deleteDoc(docRef);
-                        alert("삭제되었습니다.");
+                        alert("🗑️ 삭제되었습니다.");
                     }
-                } else {
-                    alert("비밀번호가 일치하지 않습니다.");
-                }
-            } else if(action === '2') {
-                const pw = prompt("글 작성 시 설정한 비밀번호를 입력하세요.");
-                if(!pw) return;
-
-                const docRef = doc(db, "posts", id);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists() && docSnap.data().password === pw) {
-                    const newContent = prompt("수정할 내용을 입력하세요.", docSnap.data().content);
-                    if(newContent) {
+                } else if (action === '2') {
+                    const newContent = prompt("수정할 내용을 입력하세요.", post.content);
+                    if (newContent) {
                         await updateDoc(docRef, { content: newContent });
-                        alert("수정되었습니다.");
+                        alert("✨ 수정되었습니다.");
                     }
-                } else {
-                    alert("비밀번호가 일치하지 않습니다.");
                 }
             }
         },
 
-        // 5. 좋아요 (기존 유지)
+        // 5. 좋아요
         like: async (btn, id) => {
             if(btn.disabled) return;
             btn.disabled = true;
@@ -2963,7 +3008,7 @@ window.app = {
             } catch (e) { console.error(e); } finally { setTimeout(() => { btn.disabled = false; }, 300); }
         },
 
-        // 6. 댓글 모달 열기
+        // 6. 댓글 모달 열기 (시간 표시 + 삭제 버튼)
         openCommentModal: (id) => {
             window.community.currentPostId = id;
             const target = window.community.posts.find(p => p.id === id);
@@ -2972,36 +3017,46 @@ window.app = {
             const listBox = document.getElementById('cmt-list-box');
             document.getElementById('cmt-total-cnt').innerText = comments.length;
             
+            // 입력창 초기화
+            document.getElementById('cmt-input').value = '';
+            document.getElementById('cmt-pw').value = '';
+
             listBox.innerHTML = ''; 
 
             if(comments.length === 0) {
                 listBox.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">아직 댓글이 없습니다.<br>첫 번째 댓글을 남겨보세요!</div>';
             } else {
                 comments.forEach(cmt => {
-                    // ★ [핵심] 텍스트가 '@'로 시작하면 답글로 판단
-                    let isReply = cmt.text.startsWith("@");
+                    // 답글 디자인 처리 (@닉네임)
                     let displayBody = cmt.text;
                     let replyClass = "";
-                    let replyIcon = "";
 
-                    if (isReply) {
-                        // [수정] 닉네임이 "행복한 햄스터"처럼 두 단어니까, '두 번째' 공백을 찾습니다.
-                        const firstSpace = cmt.text.indexOf(' ');
-                        const secondSpace = cmt.text.indexOf(' ', firstSpace + 1);
-
-                        // 두 번째 공백이 있어야 정상적인 "닉네임 + 메시지" 형태입니다.
-                        if (secondSpace > 0) {
-                            const mention = cmt.text.substring(0, secondSpace); // @행복한 햄스터
-                            const msg = cmt.text.substring(secondSpace + 1);    // 손!!!!
-                            
+                    if (cmt.text.startsWith("@")) {
+                        const parts = cmt.text.split(' ');
+                        // "@형용사 동물 내용" 형태일 때만 파싱 (최소 3덩어리)
+                        if (parts.length >= 3) {
+                            const mention = `${parts[0]} ${parts[1]}`; // @형용사 동물
+                            const msg = parts.slice(2).join(' '); // 나머지 내용
                             displayBody = `<span class="reply-icon">↳</span><span class="mention-badge">${mention}</span>${msg}`;
                             replyClass = "reply-mode";
                         }
                     }
 
+                    // 시간 변환
+                    const timeStr = window.community.timeForToday(cmt.time);
+
+                    // [수정] 삭제 버튼 추가 및 구조 개선
+                    // 댓글 ID가 없으면(옛날 댓글) time 값을 ID처럼 사용
+                    const cmtId = cmt.id || cmt.time; 
+
                     listBox.innerHTML += `
                         <div class="comment-item ${replyClass}" onclick="window.community.replyTo('${cmt.nick}')" style="cursor:pointer;">
-                            <div class="cmt-nick">👤 ${cmt.nick || '익명'} <span class="cmt-time">방금 전</span></div>
+                            <div class="cmt-header">
+                                <div class="cmt-info">
+                                    👤 ${cmt.nick} <span class="cmt-time">${timeStr}</span>
+                                </div>
+                                <button class="cmt-del-btn" onclick="event.stopPropagation(); window.community.deleteComment('${cmtId}')">×</button>
+                            </div>
                             <div class="cmt-body">${displayBody}</div>
                         </div>
                     `;
@@ -3010,40 +3065,131 @@ window.app = {
             modal.style.display = 'flex';
         },
 
-        // 7. 답글 기능 (닉네임 클릭 시 호출)
+        // 7. 답글 달기
         replyTo: (nick) => {
             const input = document.getElementById('cmt-input');
-            input.value = `@${nick} `; // 멘션 자동 입력
+            input.value = `@${nick} `;
             input.focus();
         },
 
-        // 8. 댓글 등록
+        // 8. 댓글 등록 (ID, 비밀번호 저장 추가)
         addComment: async () => {
             const input = document.getElementById('cmt-input');
+            const pwInput = document.getElementById('cmt-pw');
+            
             const txt = input.value.trim();
-            if(!txt) return;
+            const pw = pwInput.value.trim();
+
+            if(!txt) { alert("내용을 입력해주세요."); return; }
+            if(!pw) { alert("삭제 시 사용할 비밀번호(4자리)를 입력해주세요."); return; }
 
             const adj = window.community.adjectives[Math.floor(Math.random() * window.community.adjectives.length)];
             const ani = window.community.animals[Math.floor(Math.random() * window.community.animals.length)];
-            const newComment = { nick: `${adj} ${ani}`, text: txt, time: new Date().toISOString() };
+            
+            const newComment = { 
+                id: Date.now().toString(),
+                nick: `${adj} ${ani}`, 
+                text: txt, 
+                password: pw,
+                time: new Date().toISOString() 
+            };
 
             try {
                 const postId = window.community.currentPostId;
-                await updateDoc(doc(db, "posts", postId), { commentList: arrayUnion(newComment) });
-                
-                // 화면 즉시 반영
+                await updateDoc(doc(db, "posts", postId), { 
+                    commentList: arrayUnion(newComment) 
+                });
+
+                // ▼▼▼ [이 부분이 추가되었습니다] 화면에 바로 그려주는 코드 ▼▼▼
                 const listBox = document.getElementById('cmt-list-box');
-                if(listBox.children[0] && listBox.children[0].innerText.includes('아직 댓글')) listBox.innerHTML = '';
+                
+                // 1. "아직 댓글이 없습니다" 문구가 있다면 지우기
+                if(listBox.children.length > 0 && listBox.children[0].innerText.includes('아직 댓글')) {
+                     listBox.innerHTML = '';
+                }
+
+                // 2. 답글(@멘션)인지 확인해서 스타일 적용
+                let displayBody = newComment.text;
+                let replyClass = "";
+
+                if (newComment.text.startsWith("@")) {
+                    const parts = newComment.text.split(' ');
+                    if (parts.length >= 3) {
+                        const mention = `${parts[0]} ${parts[1]}`;
+                        const msg = parts.slice(2).join(' ');
+                        displayBody = `<span class="reply-icon">↳</span><span class="mention-badge">${mention}</span>${msg}`;
+                        replyClass = "reply-mode";
+                    }
+                }
+
+                // 3. 목록 맨 아래에 추가
                 listBox.innerHTML += `
-                    <div class="comment-item" onclick="window.community.replyTo('${newComment.nick}')">
-                        <div class="cmt-nick">👤 ${newComment.nick} (나) <span class="cmt-time">방금 전</span></div>
-                        <div class="cmt-body">${newComment.text}</div>
+                    <div class="comment-item ${replyClass}" onclick="window.community.replyTo('${newComment.nick}')" style="cursor:pointer;">
+                        <div class="cmt-header">
+                            <div class="cmt-info">
+                                👤 ${newComment.nick} <span class="cmt-time">방금 전</span>
+                            </div>
+                            <button class="cmt-del-btn" onclick="event.stopPropagation(); window.community.deleteComment('${newComment.id}')">×</button>
+                        </div>
+                        <div class="cmt-body">${displayBody}</div>
                     </div>
                 `;
-                input.value = '';
+                
+                // 4. 스크롤을 맨 아래로 내리기
                 listBox.scrollTop = listBox.scrollHeight;
+
+                // 5. 입력창 비우기
+                input.value = '';
+                pwInput.value = '';
+                
             } catch (e) {
                 console.error("댓글 저장 실패:", e);
+                alert("댓글을 저장하지 못했습니다.");
+            }
+        },
+
+        // 9. [신규] 댓글 삭제 기능
+        deleteComment: async (commentId) => {
+            const pw = prompt("댓글 비밀번호를 입력하세요.");
+            if (!pw) return;
+
+            try {
+                const postId = window.community.currentPostId;
+                const postRef = doc(db, "posts", postId);
+                const postSnap = await getDoc(postRef);
+
+                if (postSnap.exists()) {
+                    const postData = postSnap.data();
+                    const comments = postData.commentList || [];
+                    
+                    // ID로 댓글 찾기 (ID가 없으면 시간으로 찾기 - 하위호환)
+                    const targetComment = comments.find(c => (c.id === commentId) || (c.time === commentId));
+
+                    if (!targetComment) {
+                        alert("이미 삭제된 댓글입니다.");
+                        return;
+                    }
+
+                    // 비밀번호 검사 (비번 없는 옛날 댓글은 삭제 불가 or 프리패스 정책 결정)
+                    // 여기서는 '비번이 있으면 검사, 없으면(옛날댓글) 프리패스'로 설정
+                    if (targetComment.password && targetComment.password !== pw) {
+                        alert("비밀번호가 일치하지 않습니다.");
+                        return;
+                    }
+
+                    // 해당 댓글만 제외하고 새 배열 만들기
+                    const newComments = comments.filter(c => c !== targetComment);
+
+                    // DB 업데이트
+                    await updateDoc(postRef, { commentList: newComments });
+                    
+                    // 화면 갱신을 위해 수동 호출 (UX 향상)
+                    window.community.openCommentModal(postId);
+                    alert("댓글이 삭제되었습니다.");
+                }
+            } catch (e) {
+                console.error("삭제 실패:", e);
+                alert("삭제 중 오류가 발생했습니다.");
             }
         }
     };
