@@ -118,7 +118,12 @@
         .toggle-switch.on .toggle-knob { transform: translateX(24px); }
 
         /* Range Slider */
-        input[type=range] { width: 200px; }
+        input[type=range] { width: 200px; accent-color: var(--brand); }
+        
+        /* Password Change Input */
+        .pw-input-group { display:none; flex-direction:column; gap:10px; align-items:flex-end; }
+        .pw-input-group.show { display:flex; }
+        .pw-field { padding:8px; border:1px solid #ddd; border-radius:4px; width:200px; }
 
         /* Sections Visibility */
         .section { display: none; animation: fadeIn 0.4s ease-out; }
@@ -169,7 +174,7 @@
         </div>
         <div class="sidebar-footer">
             <b>Enterprise Plan</b><br>
-            v 2.1.1 (Secure Build)<br>
+            v 2.1.2 (Patched)<br>
             Last Login: Today 09:41
         </div>
     </aside>
@@ -217,9 +222,9 @@
                 <div class="card">
                     <div class="kpi-title" style="margin-bottom:20px;">
                         <span>팀별 스트레스 지수 비교 (평균 vs 최고)</span>
-                        <select style="border:1px solid #ddd; padding:4px; border-radius:4px; font-size:12px;">
-                            <option>최근 1개월</option>
-                            <option>최근 3개월</option>
+                        <select id="chart-period-select" onchange="updateMainChart(this.value)" style="border:1px solid #ddd; padding:4px; border-radius:4px; font-size:12px; cursor:pointer;">
+                            <option value="1m">최근 1개월</option>
+                            <option value="3m">최근 3개월</option>
                         </select>
                     </div>
                     <div class="chart-container">
@@ -389,7 +394,10 @@
                             <h4>위험 단계 기준값 조정 (Threshold)</h4>
                             <p>현재 설정: 80점 이상 시 '위험(Critical)'으로 분류</p>
                         </div>
-                        <input type="range" min="60" max="95" value="80" onchange="alert('기준값이 '+this.value+'점으로 변경되었습니다.')">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <input type="range" min="60" max="95" value="80" oninput="updateRangeDisplay(this.value)">
+                            <span id="range-val" style="font-weight:bold; color:var(--brand); font-size:18px; width:30px; text-align:right;">80</span>
+                        </div>
                     </div>
                 </div>
 
@@ -415,12 +423,23 @@
 
                 <div class="setting-group">
                     <div class="group-title">계정 관리</div>
-                    <div class="setting-row">
+                    <div class="setting-row" style="align-items: flex-start;">
                         <div class="setting-label">
                             <h4>비밀번호 변경</h4>
-                            <p>정기적인 비밀번호 변경을 권장합니다. (최근 변경: 3개월 전)</p>
+                            <p>정기적인 비밀번호 변경을 권장합니다. (기본값: 0000)</p>
                         </div>
-                        <button style="padding:8px 15px; border:1px solid #ddd; background:white; border-radius:6px; cursor:pointer;">변경하기</button>
+                        
+                        <div style="text-align: right;">
+                            <button id="btn-toggle-pw" onclick="togglePwForm()" style="padding:8px 15px; border:1px solid #ddd; background:white; border-radius:6px; cursor:pointer;">변경하기</button>
+                            
+                            <div id="pw-form" class="pw-input-group" style="margin-top:10px;">
+                                <input type="password" id="new-pw-input" class="pw-field" placeholder="새 비밀번호 입력">
+                                <div>
+                                    <button onclick="togglePwForm()" style="padding:5px 10px; background:#eee; border:none; border-radius:4px; cursor:pointer;">취소</button>
+                                    <button onclick="saveNewPw()" style="padding:5px 10px; background:var(--brand); color:white; border:none; border-radius:4px; cursor:pointer;">저장</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="setting-row">
                         <div class="setting-label">
@@ -468,6 +487,9 @@
     </script>
 
     <script>
+        // --- Global Variables ---
+        let currentAdminPw = "0000"; // 비밀번호 변수
+
         // --- Navigation Logic ---
         function showSection(id, btn) {
             document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
@@ -484,14 +506,15 @@
             document.getElementById('page-title').innerText = titles[id];
         }
 
+        // --- Auth & Security Logic ---
         function checkLogin() {
-            const pw = document.getElementById('admin-pw').value;
-            if(pw === '0000') {
+            const pwInput = document.getElementById('admin-pw');
+            if(pwInput.value === currentAdminPw) {
                 document.getElementById('login-screen').style.display = 'none';
                 initCharts(); // 로그인 후 차트 로딩
             } else {
                 alert("ACCESS DENIED: 비밀번호가 일치하지 않습니다.");
-                document.getElementById('admin-pw').value = '';
+                pwInput.value = '';
             }
         }
 
@@ -499,12 +522,50 @@
             if (e.key === 'Enter') checkLogin();
         });
 
+        // 비밀번호 변경 기능
+        function togglePwForm() {
+            const form = document.getElementById('pw-form');
+            const btn = document.getElementById('btn-toggle-pw');
+            
+            if(form.classList.contains('show')) {
+                form.classList.remove('show');
+                btn.style.display = 'block';
+            } else {
+                form.classList.add('show');
+                btn.style.display = 'none';
+            }
+        }
+
+        function saveNewPw() {
+            const newPw = document.getElementById('new-pw-input').value;
+            if(newPw.length < 4) {
+                alert("비밀번호는 4자리 이상이어야 합니다.");
+                return;
+            }
+            currentAdminPw = newPw;
+            alert("비밀번호가 변경되었습니다.\n다음 로그인부터 새 비밀번호를 사용하세요.");
+            togglePwForm();
+            document.getElementById('new-pw-input').value = '';
+        }
+
+        // 설정 슬라이더 표시 기능
+        function updateRangeDisplay(val) {
+            document.getElementById('range-val').innerText = val;
+        }
+
+
         function toggleSwitch(el) {
             el.classList.toggle('on');
         }
 
         // --- Chart & Data Logic ---
         let mainChart, timeChart, teamTrendChart, teamKeywordChart;
+
+        // 메인 대시보드 차트 데이터 (1개월 vs 3개월)
+        const mainChartDataSets = {
+            '1m': [65, 88, 52, 74, 42, 70],
+            '3m': [60, 82, 55, 70, 45, 68] // 3개월 평균은 조금 다르게 설정
+        };
 
         // 팀별 더미 데이터
         const teamData = {
@@ -565,6 +626,13 @@
             updateTeamCharts(data.trend, data.keywords);
         };
 
+        // 메인 차트 기간 변경 기능
+        window.updateMainChart = (period) => {
+            if(!mainChart) return;
+            mainChart.data.datasets[0].data = mainChartDataSets[period];
+            mainChart.update();
+        };
+
         function initCharts() {
             // 1. 메인 대시보드 차트
             const ctx1 = document.getElementById('mainChart').getContext('2d');
@@ -574,7 +642,7 @@
                     labels: ['마케팅 1팀', '마케팅 2팀', '개발 A팀', '개발 B팀', '인사팀', '영업팀'],
                     datasets: [{
                         label: '평균 스트레스',
-                        data: [65, 88, 52, 74, 42, 70],
+                        data: mainChartDataSets['1m'], // 초기값 1개월
                         backgroundColor: (c) => c.raw > 80 ? '#FF6B6B' : (c.raw > 60 ? '#FF9F43' : '#4496F5'),
                         borderRadius: 6
                     }]
