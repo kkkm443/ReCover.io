@@ -2707,7 +2707,11 @@ window.app = {
             window.app.switchTab('chat');
         };
 
-        document.getElementById('sos-btn').onclick = () => window.chat.goChat('human');
+        document.getElementById('sos-btn').onclick = () => {
+			window.app.dismissAlert();     // 1. 빨간색 공황 알림창 닫기
+			window.app.switchTab('chat');  // 2. '상담' 탭으로 화면 이동
+			window.chat.showAiOptions();   // 3. AI 상담 선택 화면(성격 선택) 표시
+		};
         document.getElementById('btn-book-expert').onclick = window.booking.open;
         
         // 저장된 기분 표시
